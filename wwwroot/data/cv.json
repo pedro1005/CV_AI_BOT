@@ -1,0 +1,84 @@
+{
+  "name": "Pedro Alexandre Monteiro Rodrigues da Costa",
+  "birthday": "05/01/1985",
+  "age": 40,
+  "address": "Rio Tinto, Gondomar",
+  "nationality": "Portuguese",
+  "contacts": {
+    "phone": "+351 932 428 144",
+    "email": "ipedroi@hotmail.com",
+    "linkedin": "https://www.linkedin.com/in/pedro-costa-98036b279",
+    "github": "https://github.com/pedro1005"
+  },
+  "summary": "Currently transitioning into the Information Technology field, I bring over 12 years of experience in retail management, having worked as a warehouse supervisor, section manager, and currently as a store manager. With strong skills in team leadership, problem-solving, and operational management, I am now focused on applying these strengths to my growing expertise in software development. I am a student at 42 School, where I am in Rank 5/6, gaining in-depth knowledge in C programming, Linux, and computer science fundamentals. Additionally, I completed a 50-hour ASP.NET Core MVC course (UFCD 10792), using C#, MySQL, and Entity Framework to build a full CRUD application. I am seeking an opportunity to apply and further develop my technical skills in a professional environment.",
+  "education": [
+    {
+      "program": "Software Development",
+      "institution": "42 School Porto",
+      "years": "2023 – 2025 (expected)"
+    },
+    {
+      "program": "Integrated Master’s in Biomedical Engineering",
+      "institution": "University of Minho",
+      "years": "2004 – 2007 (incomplete)"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Store Manager",
+      "company": "Marec Espaço Casa SA",
+      "years": "2013 – Present",
+      "responsibilities": [
+        "Team management, scheduling, and task distribution",
+        "Ensuring compliance with internal procedures",
+        "Inventory control, loss prevention, and order management",
+        "Goal-oriented sales and customer service leadership"
+      ]
+    },
+    {
+      "role": "Administrative Assistant",
+      "company": "Inpre (Industrial Precisão) Lda",
+      "years": "2007 – 2013",
+      "responsibilities": [
+        "Invoicing and order processing",
+        "Stock management and logistics coordination"
+      ]
+    }
+  ],
+  "technical_skills": {
+    "programming": ["C", "C++", "C#"],
+    "frameworks": ["ASP.NET Core MVC", "Entity Framework"],
+    "databases": ["MySQL"],
+    "tools": ["Git", "GitHub", "Linux"],
+    "methods": ["Agile", "CRUD Development"]
+  },
+  "42 projects": [
+    {
+      "name": "Minishell",
+      "description": [
+        "Completed intensive programming projects focused on C, Linux, and low-level system programming",
+        "Built command-line tools, explored memory management, and implemented custom algorithms",
+        "Developed problem-solving skills under peer-review and project-based learning model",
+        "Practiced Git workflow and Agile methodologies throughout the development cycle"
+      ],
+      "link": "https://github.com/pedro1005/minishell"
+    }
+  ],
+  "Other projects": [
+    {
+      "name": "CRUD Web Application",
+      "year": "2024",
+      "where": "EISNT Training Program",
+      "description": [
+        "Developed a full-stack web application implementing full CRUD functionality",
+        "Used ASP.NET Core MVC, C#, Entity Framework, and MySQL",
+        "Implemented user authentication, form validation, and relational database integration"
+      ],
+      "link": "https://github.com/pedro1005/AspnetMVC"
+    }
+  ],
+  "languages": {
+    "Portuguese": "Native",
+    "English": "Intermediate"
+  }
+}

@@ -1,0 +1,111 @@
+@{
+    ViewData["Title"] = "AI Pedro Costa";
+}
+
+<!-- Include Bootstrap CSS from CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container my-5">
+
+    <!-- ===== Header ===== -->
+    <div class="text-center mb-5">
+        <img src="~/pics/pedmonte.jpg" class="rounded-circle mb-3" alt="Pedro Costa" width="150" height="150" />
+        <h1 class="display-5">Pedro Costa's AI Assistance Bot 🤖</h1>
+        <p class="text-muted">Ask about my experience, skills, or send me a message.</p>
+    </div>
+
+    <!-- ===== CV Question Form ===== -->
+    <section class="mb-5">
+        <h2 class="mb-3">Ask About My CV</h2>
+        <div class="input-group mb-3">
+            <input type="text" id="cvQuestion" class="form-control" placeholder="Ask about my experience, skills, etc..." />
+            <button class="btn btn-primary" onclick="askAboutCv()">Ask</button>
+        </div>
+        <div id="cvReply" class="card p-3">
+            Waiting for question...
+        </div>
+    </section>
+
+    <!-- ===== Contact Message Form ===== -->
+    <section>
+        <h2 class="mb-3">Send Me a Message</h2>
+        <div class="mb-3">
+            <input type="text" id="companyName" class="form-control mb-2" placeholder="Company name" />
+            <input type="text" id="contactName" class="form-control mb-2" placeholder="Contact person" />
+            <textarea id="contactMessage" class="form-control" rows="4" placeholder="Your message..."></textarea>
+        </div>
+        <button class="btn btn-success mb-3" onclick="sendUserMessage()">Send Message</button>
+        <div id="messageReply" class="card p-3">
+            Waiting to send message...
+        </div>
+    </section>
+
+</div>
+
+<!-- Include Bootstrap JS Bundle (optional, for components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ===== Ask About CV ===== */
+async function askAboutCv() {
+    const replyDiv = document.getElementById("cvReply");
+    const userMessage = document.getElementById("cvQuestion").value.trim();
+
+    if (!userMessage) {
+        replyDiv.innerText = "Please enter your question.";
+        return;
+    }
+
+    replyDiv.innerText = "Processing...";
+
+    try {
+        const response = await fetch("/Chat/Ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "userMessage=" + encodeURIComponent(userMessage)
+        });
+
+        const data = await response.json();
+        replyDiv.innerText = data.reply;
+        document.getElementById("cvQuestion").value = "";
+    } catch (err) {
+        replyDiv.innerText = "Something went wrong: " + err;
+    }
+}
+
+/* ===== Send Message to Company ===== */
+async function sendUserMessage() {
+    const replyDiv = document.getElementById("messageReply");
+    const company = document.getElementById("companyName").value.trim();
+    const contact = document.getElementById("contactName").value.trim();
+    const message = document.getElementById("contactMessage").value.trim();
+
+    if (!company || !contact || !message) {
+        replyDiv.innerText = "Please fill in all fields.";
+        return;
+    }
+
+    replyDiv.innerText = "Sending message...";
+
+    const userMessage = `Send a message to Company: ${company}, Contact: ${contact}, Message: ${message}`;
+
+    try {
+        const response = await fetch("/Chat/SendMessage", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "userMessage=" + encodeURIComponent(userMessage)
+        });
+
+        const data = await response.json();
+        replyDiv.innerText = data.reply;
+
+        // Clear inputs after success
+        document.getElementById("companyName").value = "";
+        document.getElementById("contactName").value = "";
+        document.getElementById("contactMessage").value = "";
+    } catch (err) {
+        replyDiv.innerText = "Something went wrong: " + err;
+    }
+}
+</script>
+
