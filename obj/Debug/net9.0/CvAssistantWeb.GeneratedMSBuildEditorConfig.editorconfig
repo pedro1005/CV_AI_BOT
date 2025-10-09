@@ -9,45 +9,45 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = CvAssistantWeb
 build_property.RootNamespace = CvAssistantWeb
-build_property.ProjectDir = /home/pedmonte/C#/CvAssistantWeb/
+build_property.ProjectDir = /home/pedmonte/C#/AI_BOT_GIT/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /home/pedmonte/C#/CvAssistantWeb
+build_property.MSBuildProjectDirectory = /home/pedmonte/C#/AI_BOT_GIT
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/Chat/Index.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/Chat/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2hhdC9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/Home/Index.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/Home/Privacy.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/Shared/Error.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/Shared/_ValidationScriptsPartial.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/_ViewImports.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/_ViewStart.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/pedmonte/C\#/CvAssistantWeb/Views/Shared/_Layout.cshtml]
+[/home/pedmonte/C\#/AI_BOT_GIT/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-ay3wvfhh61

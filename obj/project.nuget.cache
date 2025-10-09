@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RiLbYk0i8XU=",
+  "dgSpecHash": "bp+/KF9j8Ng=",
   "success": true,
-  "projectFilePath": "/home/pedmonte/C#/CvAssistantWeb/CvAssistantWeb.csproj",
+  "projectFilePath": "/home/pedmonte/C#/AI_BOT_GIT/CvAssistantWeb.csproj",
   "expectedPackageFiles": [
     "/home/pedmonte/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
     "/home/pedmonte/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.3/microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512",

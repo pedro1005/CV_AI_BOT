@@ -273,11 +273,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/pedmonte/C#/CvAssistantWeb/CvAssistantWeb.csproj",
+      "projectUniqueName": "/home/pedmonte/C#/AI_BOT_GIT/CvAssistantWeb.csproj",
       "projectName": "CvAssistantWeb",
-      "projectPath": "/home/pedmonte/C#/CvAssistantWeb/CvAssistantWeb.csproj",
+      "projectPath": "/home/pedmonte/C#/AI_BOT_GIT/CvAssistantWeb.csproj",
       "packagesPath": "/home/pedmonte/.nuget/packages/",
-      "outputPath": "/home/pedmonte/C#/CvAssistantWeb/obj/",
+      "outputPath": "/home/pedmonte/C#/AI_BOT_GIT/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/pedmonte/.nuget/NuGet/NuGet.Config"
