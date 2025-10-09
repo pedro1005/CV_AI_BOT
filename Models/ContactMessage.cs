@@ -1,9 +1,12 @@
-namespace CvAssistantWeb.Models;
-
-public class ContactMessage
+namespace CvAssistantWeb.Models
 {
-    public string Company { get; set; }
-    public string Contact { get; set; }
-    public string Message { get; set; }
-    public DateTime Date { get; set; }
+    public class ContactMessage
+    {
+        public int Id { get; set; }
+        public string Company { get; set; } = string.Empty;
+        public string Contact { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public DateTime Date { get; set; }
+    }
 }
+

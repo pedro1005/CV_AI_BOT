@@ -36,17 +36,17 @@
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"qs6sf23xma"},{"Name":"integrity","Value":"sha256-lsd0ale0S1DaD7BNsDnhl77xipjd4Ol/M9eLv/Da8LI="},{"Name":"label","Value":"_content/CvAssistantWeb/data/cv.json"}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"3536"},{"Name":"Content-Type","Value":"application/json"},{"Name":"ETag","Value":"\u0022lsd0ale0S1DaD7BNsDnhl77xipjd4Ol/M9eLv/Da8LI=\u0022"},{"Name":"Last-Modified","Value":"Thu, 02 Oct 2025 23:53:32 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/CvAssistantWeb/data/messages.5ipweew5fc.json">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\data\messages.json'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"5ipweew5fc"},{"Name":"integrity","Value":"sha256-47DEQpj8HBSa\u002B/TImW\u002B5JCeuQeRkm5NMpJWZG3hSuFU="},{"Name":"label","Value":"_content/CvAssistantWeb/data/messages.json"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"0"},{"Name":"Content-Type","Value":"application/json"},{"Name":"ETag","Value":"\u002247DEQpj8HBSa\u002B/TImW\u002B5JCeuQeRkm5NMpJWZG3hSuFU=\u0022"},{"Name":"Last-Modified","Value":"Wed, 08 Oct 2025 14:50:18 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/CvAssistantWeb/data/messages.json">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\data\messages.json'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-JrsjhrxwJCe\u002B\u002B9EQzmf4tzqCMuAkUEvwYPvOT7auhQs="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"397"},{"Name":"Content-Type","Value":"application/json"},{"Name":"ETag","Value":"\u0022JrsjhrxwJCe\u002B\u002B9EQzmf4tzqCMuAkUEvwYPvOT7auhQs=\u0022"},{"Name":"Last-Modified","Value":"Sun, 05 Oct 2025 12:00:08 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/CvAssistantWeb/data/messages.qg8guuuz2a.json">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\data\messages.json'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"qg8guuuz2a"},{"Name":"integrity","Value":"sha256-JrsjhrxwJCe\u002B\u002B9EQzmf4tzqCMuAkUEvwYPvOT7auhQs="},{"Name":"label","Value":"_content/CvAssistantWeb/data/messages.json"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"397"},{"Name":"Content-Type","Value":"application/json"},{"Name":"ETag","Value":"\u0022JrsjhrxwJCe\u002B\u002B9EQzmf4tzqCMuAkUEvwYPvOT7auhQs=\u0022"},{"Name":"Last-Modified","Value":"Sun, 05 Oct 2025 12:00:08 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-47DEQpj8HBSa\u002B/TImW\u002B5JCeuQeRkm5NMpJWZG3hSuFU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"0"},{"Name":"Content-Type","Value":"application/json"},{"Name":"ETag","Value":"\u002247DEQpj8HBSa\u002B/TImW\u002B5JCeuQeRkm5NMpJWZG3hSuFU=\u0022"},{"Name":"Last-Modified","Value":"Wed, 08 Oct 2025 14:50:18 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/CvAssistantWeb/favicon.61n19gt1b8.ico">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\favicon.ico'))</AssetFile>
