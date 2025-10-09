@@ -8,13 +8,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Registrar HttpClient para OpenRouter
-builder.Services.AddHttpClient("OpenRouter", client =>
+builder.Services.AddHttpClient("CometAPI", client =>
 {
-    client.BaseAddress = new Uri("https://openrouter.ai/api/v1/");
-    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {builder.Configuration["OpenRouter:ApiKey"]}");
-    client.DefaultRequestHeaders.Add("HTTP-Referer", "http://localhost:5204");
+    client.BaseAddress = new Uri("https://api.cometapi.com/v1/");
+    client.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
+            "sk-4TNPT9S407B6ZXhsPZGfd9gYuzv070wD5gy8zc9bnnHyYVc7"); // chave direta
+
     client.DefaultRequestHeaders.Add("X-Title", "CV Assistant");
 });
+
 
 var app = builder.Build();
 

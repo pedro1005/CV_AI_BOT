@@ -23,20 +23,15 @@ public class ChatController : Controller
     [HttpPost]
     public async Task<IActionResult> Ask(string userMessage)
     {
-        //var client = _httpClientFactory.CreateClient("OpenRouter");
-        var client = _httpClientFactory.CreateClient();
-        var apiKey = "sk-4TNPT9S407B6ZXhsPZGfd9gYuzv070wD5gy8zc9bnnHyYVc7";
-        client.BaseAddress = new Uri("https://api.cometapi.com/v1/");
-        client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+        var client = _httpClientFactory.CreateClient("CometAPI");
 
         var payload = new
         {
-            model = "gpt-4o",
+            model = "gpt-3.5-turbo",
             messages = new object[]
             {
-                new { role = "system", content = $"You are a software developer junior looking for a job as junior or intern with cv {_cvJson}. Will answear in plain text, never like json format." },
-                new { role = "user", content = $".Question: {userMessage}. if question info not available in cv answer 'Sorry, info not available.'" }
+                new { role = "system", content = $"You are a junior software developer looking for a job with CV {_cvJson}. Answer in plain text." },
+                new { role = "user", content = userMessage }
             }
         };
 
@@ -62,6 +57,7 @@ public class ChatController : Controller
             return Json(new { reply = "Error: " + ex.Message });
         }
     }
+
     
     [HttpPost]
 public IActionResult SendMessage(string userMessage)
