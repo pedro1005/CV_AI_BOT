@@ -25,7 +25,7 @@ public class ChatController : Controller
     {
         //var client = _httpClientFactory.CreateClient("OpenRouter");
         var client = _httpClientFactory.CreateClient();
-        var apiKey = "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";
+        var apiKey = "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";
         client.BaseAddress = new Uri("https://openrouter.ai/api/v1/");
         client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
