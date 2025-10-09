@@ -7,13 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
+var cometApiKey = Environment.GetEnvironmentVariable("COMET_API_KEY");
 // Registrar HttpClient para OpenRouter
 builder.Services.AddHttpClient("CometAPI", client =>
 {
     client.BaseAddress = new Uri("https://api.cometapi.com/v1/");
     client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
-            "sk-4TNPT9S407B6ZXhsPZGfd9gYuzv070wD5gy8zc9bnnHyYVc7"); // chave direta
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", cometApiKey); // chave direta
 
     client.DefaultRequestHeaders.Add("X-Title", "CV Assistant");
 });
