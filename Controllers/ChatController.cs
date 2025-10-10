@@ -92,7 +92,7 @@ namespace CvAssistantWeb.Controllers
                     Company = company.Trim(),
                     Contact = contact.Trim(),
                     Message = message.Trim(),
-                    Date = DateTime.Now
+                    Date = DateTime.UtcNow
                 };
 
                 // ✅ Save to PostgreSQL
