@@ -39,7 +39,8 @@
             Waiting to send message...
         </div>
     </section>
-    
+
+    <!-- ===== Admin: View Messages ===== -->
     <section class="mt-5">
         <h2 class="mb-3">View All Messages (Admin)</h2>
         <div class="input-group mb-3" style="max-width: 400px;">
@@ -51,10 +52,9 @@
         </div>
     </section>
 
-
 </div>
 
-<!-- Include Bootstrap JS Bundle (optional, for components) -->
+<!-- Include Bootstrap JS Bundle (optional) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -119,49 +119,54 @@ async function sendUserMessage() {
         replyDiv.innerText = "Something went wrong: " + err;
     }
 }
-</script>
 
+/* ===== Admin: Fetch All Messages ===== */
 async function fetchAllMessages() {
-const replyDiv = document.getElementById("allMessages");
-const password = document.getElementById("adminPassword").value.trim();
+    const replyDiv = document.getElementById("allMessages");
+    const password = document.getElementById("adminPassword").value.trim();
 
-if (!password) {
-replyDiv.innerText = "Please enter the password.";
-return;
+    if (!password) {
+        replyDiv.innerText = "Please enter the password.";
+        return;
+    }
+
+    replyDiv.innerText = "Loading messages...";
+
+    try {
+        const formData = new URLSearchParams();
+        formData.append("password", password);
+
+        const response = await fetch("/Chat/GetAllMessages", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString()
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            replyDiv.innerText = data.reply;
+            return;
+        }
+
+        if (data.messages.length === 0) {
+            replyDiv.innerText = "No messages found.";
+            return;
+        }
+
+        // Format messages
+        replyDiv.innerHTML = `
+            <ul class="list-group">
+                ${data.messages.map(m => `
+                    <li class="list-group-item">
+                        <strong>${m.Company}</strong> — ${m.Contact}<br>
+                        <small>${m.Date}</small><br>
+                        ${m.Message}
+                    </li>
+                `).join("")}
+            </ul>`;
+    } catch (err) {
+        replyDiv.innerText = "Something went wrong: " + err;
+    }
 }
-
-replyDiv.innerText = "Loading messages...";
-
-try {
-const formData = new URLSearchParams();
-formData.append("password", password);
-
-const response = await fetch("/Chat/GetAllMessages", {
-method: "POST",
-headers: { "Content-Type": "application/x-www-form-urlencoded" },
-body: formData.toString()
-});
-
-const data = await response.json();
-
-if (!data.success) {
-replyDiv.innerText = data.reply;
-return;
-}
-
-if (data.messages.length === 0) {
-replyDiv.innerText = "No messages found.";
-return;
-}
-
-// Format messages
-replyDiv.innerHTML = "<ul>" + data.messages.map(m => 
-    `<li><strong>${m.Company} / ${m.Contact}</strong> (${m.Date}): ${m.Message}</li>`
-    ).join("") + "</ul>";
-
-} catch (err) {
-replyDiv.innerText = "Something went wrong: " + err;
-}
-}
-
-
+</script>
