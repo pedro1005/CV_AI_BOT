@@ -156,8 +156,9 @@ async function fetchAllMessages() {
 
         // Format messages
         replyDiv.innerHTML = "<ul>" + data.messages.map(m =>
-            `<li><strong>${m.Company} / ${m.Contact}</strong> (${m.Date}): ${m.Message}</li>`
+            `<li><strong>${m.company} / ${m.contact}</strong> (${m.date}): ${m.message}</li>`
         ).join("") + "</ul>";
+
 
     } catch (err) {
         replyDiv.innerText = "Something went wrong: " + err;

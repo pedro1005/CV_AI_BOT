@@ -122,15 +122,16 @@ namespace CvAssistantWeb.Controllers
                 .OrderByDescending(m => m.Date)
                 .Select(m => new 
                 {
-                    m.Company,
-                    m.Contact,
-                    m.Message,
-                    Date = m.Date.ToString("yyyy-MM-dd HH:mm:ss")
+                    Company = m.Company,
+                    Contact = m.Contact,
+                    Message = m.Message,
+                    Date = m.Date.ToString("yyyy-MM-dd HH:mm:ss") // always UTC
                 })
                 .ToList();
 
             return Json(new { success = true, messages });
         }
+
 
 
         // 🔧 Helpers
