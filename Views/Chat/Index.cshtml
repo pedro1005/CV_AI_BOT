@@ -39,6 +39,18 @@
             Waiting to send message...
         </div>
     </section>
+    
+    <section class="mt-5">
+        <h2 class="mb-3">View All Messages (Admin)</h2>
+        <div class="input-group mb-3" style="max-width: 400px;">
+            <input type="password" id="adminPassword" class="form-control" placeholder="Enter admin password" />
+            <button class="btn btn-warning" onclick="fetchAllMessages()">Show Messages</button>
+        </div>
+        <div id="allMessages" class="card p-3">
+            Messages will appear here...
+        </div>
+    </section>
+
 
 </div>
 
@@ -108,4 +120,48 @@ async function sendUserMessage() {
     }
 }
 </script>
+
+async function fetchAllMessages() {
+const replyDiv = document.getElementById("allMessages");
+const password = document.getElementById("adminPassword").value.trim();
+
+if (!password) {
+replyDiv.innerText = "Please enter the password.";
+return;
+}
+
+replyDiv.innerText = "Loading messages...";
+
+try {
+const formData = new URLSearchParams();
+formData.append("password", password);
+
+const response = await fetch("/Chat/GetAllMessages", {
+method: "POST",
+headers: { "Content-Type": "application/x-www-form-urlencoded" },
+body: formData.toString()
+});
+
+const data = await response.json();
+
+if (!data.success) {
+replyDiv.innerText = data.reply;
+return;
+}
+
+if (data.messages.length === 0) {
+replyDiv.innerText = "No messages found.";
+return;
+}
+
+// Format messages
+replyDiv.innerHTML = "<ul>" + data.messages.map(m => 
+    `<li><strong>${m.Company} / ${m.Contact}</strong> (${m.Date}): ${m.Message}</li>`
+    ).join("") + "</ul>";
+
+} catch (err) {
+replyDiv.innerText = "Something went wrong: " + err;
+}
+}
+
 

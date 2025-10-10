@@ -106,6 +106,32 @@ namespace CvAssistantWeb.Controllers
                 return Json(new { reply = "Error: " + ex.Message });
             }
         }
+        
+        [HttpPost]
+        public IActionResult GetAllMessages(string password)
+        {
+            var correctPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
+
+            if (string.IsNullOrEmpty(correctPassword))
+                return Json(new { success = false, reply = "Server misconfigured: ADMIN_PASSWORD not set." });
+
+            if (password != correctPassword)
+                return Json(new { success = false, reply = "Invalid password!" });
+
+            var messages = _db.Messages
+                .OrderByDescending(m => m.Date)
+                .Select(m => new 
+                {
+                    m.Company,
+                    m.Contact,
+                    m.Message,
+                    Date = m.Date.ToString("yyyy-MM-dd HH:mm:ss")
+                })
+                .ToList();
+
+            return Json(new { success = true, messages });
+        }
+
 
         // 🔧 Helpers
         private string ExtractBetween(string text, string start, string end)
