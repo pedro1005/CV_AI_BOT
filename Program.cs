@@ -74,4 +74,11 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Chat}/{action=Index}/{id?}");
 
+// ✅ Run migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 app.Run();
