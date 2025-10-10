@@ -22,6 +22,7 @@ if (databaseUrl != null && databaseUrl.StartsWith("postgres://"))
 }
 else
 {
+    Console.WriteLine("Error: No connection string configured!!!!!!!!!!!!!!!!!!!!!");
     // fallback local
     connectionString = "Host=localhost;Database=cvassistant;Username=postgres;Password=1234;SSL Mode=Disable";
 }

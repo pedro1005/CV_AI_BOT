@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CvAssistantWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80f2bcd80ced6e1185c24a2cf128c5db2fa24c23")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+528c988e6d287ee7cfa34aa02c57c24e710066e2")]
 [assembly: System.Reflection.AssemblyProductAttribute("CvAssistantWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CvAssistantWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
