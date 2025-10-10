@@ -15,12 +15,23 @@ Console.WriteLine($"DATABASE_URL: '{databaseUrl}'");
 
 
 string connectionString;
-if (databaseUrl != null && databaseUrl.StartsWith("postgresql://"))
+
+if (!string.IsNullOrEmpty(databaseUrl))
 {
+    // Normalize scheme for compatibility
+    if (databaseUrl.StartsWith("postgresql://"))
+        databaseUrl = databaseUrl.Replace("postgresql://", "postgres://");
+
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
 
-    connectionString = $"Host={uri.Host};Port={uri.Port};Username={userInfo[0]};Password={userInfo[1]};Database={uri.LocalPath.TrimStart('/')};SSL Mode=Require;Trust Server Certificate=true";
+    // Use default PostgreSQL port 5432 if port is missing
+    var port = uri.Port > 0 ? uri.Port : 5432;
+
+    connectionString = $"Host={uri.Host};Port={port};Username={userInfo[0]};Password={userInfo[1]};Database={uri.LocalPath.TrimStart('/')};SSL Mode=Require;Trust Server Certificate=true";
+
+    // Optional debug
+    Console.WriteLine($"Connecting to {uri.Host}:{port}, database: {uri.LocalPath.TrimStart('/')}");
 }
 else
 {
@@ -28,6 +39,7 @@ else
     // fallback local
     connectionString = "Host=localhost;Database=cvassistant;Username=postgres;Password=1234;SSL Mode=Disable";
 }
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
