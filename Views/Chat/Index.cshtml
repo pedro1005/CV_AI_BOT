@@ -2,59 +2,56 @@
     ViewData["Title"] = "AI Pedro Costa";
 }
 
-<!-- Include Bootstrap CSS from CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container my-5">
 
     <!-- ===== Header ===== -->
     <div class="text-center mb-5">
-        <img src="~/pics/pedmonte.jpg" class="rounded-circle mb-3" alt="Pedro Costa" width="150" height="150" />
-        <h1 class="display-5">Pedro Costa's AI Assistance Bot 🤖</h1>
-        <p class="text-muted">Ask about my experience, skills, or send me a message.</p>
+        <img src="~/pics/pedmonte.jpg" class="rounded-circle mb-3 shadow-sm" alt="Pedro Costa" width="150" height="150" />
+        <h1 class="display-5 fw-bold">Pedro Costa's AI Assistance Bot 🤖</h1>
+        <p class="text-muted fs-5">Ask about my experience, skills, or send me a message.</p>
     </div>
 
     <!-- ===== CV Question Form ===== -->
     <section class="mb-5">
         <h2 class="mb-3">Ask About My CV</h2>
-        <div class="input-group mb-3">
-            <input type="text" id="cvQuestion" class="form-control" placeholder="Ask about my experience, skills, etc..." />
-            <button class="btn btn-primary" onclick="askAboutCv()">Ask</button>
+        <div class="input-group mb-3 shadow-sm">
+            <input type="text" id="cvQuestion" class="form-control rounded-start" placeholder="Ask about my experience, skills, etc..." />
+            <button class="btn btn-primary rounded-end" onclick="askAboutCv()">Ask</button>
         </div>
-        <div id="cvReply" class="card p-3">
+        <div id="cvReply" class="card p-3 shadow-sm border-primary">
             Waiting for question...
         </div>
     </section>
 
     <!-- ===== Contact Message Form ===== -->
-    <section>
+    <section class="mb-5">
         <h2 class="mb-3">Send Me a Message</h2>
         <div class="mb-3">
-            <input type="text" id="companyName" class="form-control mb-2" placeholder="Company name" />
-            <input type="text" id="contactName" class="form-control mb-2" placeholder="Contact person" />
-            <textarea id="contactMessage" class="form-control" rows="4" placeholder="Your message..."></textarea>
+            <input type="text" id="companyName" class="form-control mb-2 shadow-sm" placeholder="Company name" />
+            <input type="text" id="contactName" class="form-control mb-2 shadow-sm" placeholder="Contact person" />
+            <textarea id="contactMessage" class="form-control shadow-sm" rows="4" placeholder="Your message..."></textarea>
         </div>
-        <button class="btn btn-success mb-3" onclick="sendUserMessage()">Send Message</button>
-        <div id="messageReply" class="card p-3">
+        <button class="btn btn-success mb-3 shadow-sm" onclick="sendUserMessage()">Send Message</button>
+        <div id="messageReply" class="card p-3 shadow-sm border-success">
             Waiting to send message...
         </div>
     </section>
-    
+
     <!-- ===== Admin: View All Messages ===== -->
     <section class="mt-5">
         <h2 class="mb-3">View All Messages (Admin)</h2>
-        <div class="input-group mb-3" style="max-width: 400px;">
-            <input type="password" id="adminPassword" class="form-control" placeholder="Enter admin password" />
-            <button class="btn btn-warning" onclick="fetchAllMessages()">Show Messages</button>
+        <div class="input-group mb-3 shadow-sm" style="max-width: 400px;">
+            <input type="password" id="adminPassword" class="form-control rounded-start" placeholder="Enter admin password" />
+            <button class="btn btn-warning rounded-end" onclick="fetchAllMessages()">Show Messages</button>
         </div>
-        <div id="allMessages" class="card p-3">
+        <div id="allMessages" class="card p-3 shadow-sm border-warning">
             Messages will appear here...
         </div>
     </section>
-
 </div>
 
-<!-- Include Bootstrap JS Bundle (optional, for components) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -63,12 +60,8 @@ async function askAboutCv() {
     const replyDiv = document.getElementById("cvReply");
     const userMessage = document.getElementById("cvQuestion").value.trim();
 
-    if (!userMessage) {
-        replyDiv.innerText = "Please enter your question.";
-        return;
-    }
-
-    replyDiv.innerText = "Processing...";
+    if (!userMessage) { replyDiv.innerText = "Please enter your question."; return; }
+    replyDiv.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div> Processing...`;
 
     try {
         const response = await fetch("/Chat/Ask", {
@@ -76,9 +69,8 @@ async function askAboutCv() {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: "userMessage=" + encodeURIComponent(userMessage)
         });
-
         const data = await response.json();
-        replyDiv.innerText = data.reply;
+        replyDiv.innerHTML = `<p class="mb-0">${data.reply}</p>`;
         document.getElementById("cvQuestion").value = "";
     } catch (err) {
         replyDiv.innerText = "Something went wrong: " + err;
@@ -92,12 +84,8 @@ async function sendUserMessage() {
     const contact = document.getElementById("contactName").value.trim();
     const message = document.getElementById("contactMessage").value.trim();
 
-    if (!company || !contact || !message) {
-        replyDiv.innerText = "Please fill in all fields.";
-        return;
-    }
-
-    replyDiv.innerText = "Sending message...";
+    if (!company || !contact || !message) { replyDiv.innerText = "Please fill in all fields."; return; }
+    replyDiv.innerHTML = `<div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div> Sending message...`;
 
     const userMessage = `Send a message to Company: ${company}, Contact: ${contact}, Message: ${message}`;
 
@@ -107,16 +95,14 @@ async function sendUserMessage() {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: "userMessage=" + encodeURIComponent(userMessage)
         });
-
         const data = await response.json();
-        replyDiv.innerText = data.reply;
+        replyDiv.innerHTML = `<p class="mb-0 text-success">${data.reply}</p>`;
 
-        // Clear inputs after success
         document.getElementById("companyName").value = "";
         document.getElementById("contactName").value = "";
         document.getElementById("contactMessage").value = "";
     } catch (err) {
-        replyDiv.innerText = "Something went wrong: " + err;
+        replyDiv.innerHTML = `<p class="text-danger">Something went wrong: ${err}</p>`;
     }
 }
 
@@ -125,12 +111,8 @@ async function fetchAllMessages() {
     const replyDiv = document.getElementById("allMessages");
     const password = document.getElementById("adminPassword").value.trim();
 
-    if (!password) {
-        replyDiv.innerText = "Please enter the password.";
-        return;
-    }
-
-    replyDiv.innerText = "Loading messages...";
+    if (!password) { replyDiv.innerText = "Please enter the password."; return; }
+    replyDiv.innerHTML = `<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div> Loading messages...`;
 
     try {
         const formData = new URLSearchParams();
@@ -141,27 +123,24 @@ async function fetchAllMessages() {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: formData.toString()
         });
-
         const data = await response.json();
 
-        if (!data.success) {
-            replyDiv.innerText = data.reply;
-            return;
-        }
+        if (!data.success) { replyDiv.innerHTML = `<p class="text-danger">${data.reply}</p>`; return; }
+        if (!data.messages || data.messages.length === 0) { replyDiv.innerHTML = `<p>No messages found.</p>`; return; }
 
-        if (!data.messages || data.messages.length === 0) {
-            replyDiv.innerText = "No messages found.";
-            return;
-        }
-
-        // Format messages
-        replyDiv.innerHTML = "<ul>" + data.messages.map(m =>
-            `<li><strong>${m.company} / ${m.contact}</strong> (${m.date}): ${m.message}</li>`
-        ).join("") + "</ul>";
-
-
+        // Fancy message cards
+        replyDiv.innerHTML = data.messages.map(m => `
+            <div class="card mb-2 shadow-sm">
+                <div class="card-body p-3">
+                    <h5 class="card-title mb-1"><span class="badge bg-primary me-2">${m.company}</span>${m.contact}</h5>
+                    <p class="card-text mb-0">${m.message}</p>
+                    <small class="text-muted">${m.date}</small>
+                </div>
+            </div>
+        `).join("");
     } catch (err) {
-        replyDiv.innerText = "Something went wrong: " + err;
+        replyDiv.innerHTML = `<p class="text-danger">Something went wrong: ${err}</p>`;
     }
 }
 </script>
+
