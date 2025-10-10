@@ -11,9 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"DATABASE_URL: '{databaseUrl}'");
+
 
 string connectionString;
-if (databaseUrl != null && databaseUrl.StartsWith("postgres://"))
+if (databaseUrl != null && databaseUrl.StartsWith("postgresql://"))
 {
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
