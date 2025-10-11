@@ -4,6 +4,9 @@ using System.Text.Json;
 using CvAssistantWeb.Models;
 using CvAssistantWeb.Data; // <- namespace do seu DbContext
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace CvAssistantWeb.Controllers
 {
@@ -149,6 +152,48 @@ namespace CvAssistantWeb.Controllers
             int startIndex = text.IndexOf(start, StringComparison.OrdinalIgnoreCase);
             if (startIndex == -1) return "";
             return text[(startIndex + start.Length)..].Trim();
+        }
+    }
+    
+    public class School42Controller : Controller
+    {
+        private readonly HttpClient _httpClient;
+        private readonly string clientId = "CLI_ID";
+        private readonly string clientSecret = "CLI_SECRET";
+        private readonly string tokenUrl = "https://api.intra.42.fr/oauth/token";
+        private readonly string apiUrl = "https://api.intra.42.fr/v2/me";
+
+        public School42Controller(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
+        [HttpGet("/School42/Profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            // 1. Obter access_token
+            var tokenRequest = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string,string>("grant_type", "client_credentials"),
+                new KeyValuePair<string,string>("client_id", clientId),
+                new KeyValuePair<string,string>("client_secret", clientSecret)
+            });
+
+            var tokenResponse = await _httpClient.PostAsync(tokenUrl, tokenRequest);
+            var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+            using var tokenDoc = JsonDocument.Parse(tokenJson);
+            var accessToken = tokenDoc.RootElement.GetProperty("access_token").GetString();
+
+            // 2. Chamar a API da 42
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _httpClient.GetAsync(apiUrl);
+            if (!response.IsSuccessStatusCode)
+                return BadRequest("Erro ao conectar com a API da 42.");
+
+            var profileJson = await response.Content.ReadAsStringAsync();
+            return Content(profileJson, "application/json");
         }
     }
 }
