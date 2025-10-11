@@ -70,7 +70,7 @@ input::placeholder, textarea::placeholder {
         <h3 class="text-info mb-3"><i class="bi bi-terminal"></i>Ask me</h3>
         <div class="input-group mb-3">
             <input type="text" id="cvQuestion" class="form-control" placeholder="Ask about experience, tech stack, projects..." />
-            <button class="btn btn-info text-white btn-tech" onclick="askAboutCv()">Ask</button>
+            <button class="btn btn-info text-white btn-tech" onclick="askAboutCv()"> Ask me</button>
         </div>
         <div id="cvReply" class="mt-2">Awaiting your question...</div>
     </div>
@@ -96,9 +96,9 @@ input::placeholder, textarea::placeholder {
         <h3 class="text-warning mb-3"><i class="bi bi-lock"></i> Admin Panel</h3>
         <div class="input-group mb-3" style="max-width:400px;">
             <input type="password" id="adminPassword" class="form-control" placeholder="Enter admin password" />
-            <button class="btn btn-warning text-dark btn-tech" onclick="fetchAllMessages()">Show Messages</button>
+            <button class="btn btn-warning text-dark btn-tech" onclick="fetchAllMessages()">Enter</button>
         </div>
-        <div id="allMessages">Messages will appear here...</div>
+        <div id="allMessages"></div>
     </div>
 </div>
 

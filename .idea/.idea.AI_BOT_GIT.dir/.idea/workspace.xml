@@ -9,9 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" afterDir="false" />
-    </list>
+    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -113,6 +111,7 @@
       <workItem from="1759968607647" duration="2210000" />
       <workItem from="1759970836979" duration="1220000" />
       <workItem from="1760007194531" duration="13041000" />
+      <workItem from="1760089638575" duration="11478000" />
     </task>
     <servers />
   </component>
