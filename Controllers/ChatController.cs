@@ -175,20 +175,23 @@ namespace CvAssistantWeb.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
 
-                // 🚨 Adiciona User-Agent obrigatório para evitar 403
-                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0");
-
-                // 1️⃣ Obter access_token via Client Credentials
-                var tokenRequest = new FormUrlEncodedContent(new[]
+                // 1️⃣ Preparar request de token usando HttpRequestMessage
+                var tokenRequest = new HttpRequestMessage(HttpMethod.Post, _tokenUrl)
                 {
-                    new KeyValuePair<string,string>("grant_type","client_credentials"),
-                    new KeyValuePair<string,string>("client_id", _clientId),
-                    new KeyValuePair<string,string>("client_secret", _clientSecret)
-                });
+                    Content = new FormUrlEncodedContent(new[]
+                    {
+                        new KeyValuePair<string,string>("grant_type","client_credentials"),
+                        new KeyValuePair<string,string>("client_id", _clientId),
+                        new KeyValuePair<string,string>("client_secret", _clientSecret)
+                    })
+                };
 
-                var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
+                // 🔹 User-Agent obrigatório pela 42 API
+                tokenRequest.Headers.Add("User-Agent", "Pedro-CV-App/1.0");
+
+                var tokenResponse = await client.SendAsync(tokenRequest);
                 if (!tokenResponse.IsSuccessStatusCode)
-                    return BadRequest($"Erro ao obter token da API 42: {tokenResponse.StatusCode}");
+                    return BadRequest("Erro ao obter token da API 42.");
 
                 var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
                 using var tokenDoc = JsonDocument.Parse(tokenJson);
@@ -198,11 +201,13 @@ namespace CvAssistantWeb.Controllers
                     return BadRequest("Token da API 42 é nulo ou inválido.");
 
                 // 2️⃣ Chamar a API da 42 com login fixo
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                var response = await client.GetAsync(_apiUrl);
+                var apiRequest = new HttpRequestMessage(HttpMethod.Get, _apiUrl);
+                apiRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                apiRequest.Headers.Add("User-Agent", "Pedro-CV-App/1.0"); // User-Agent também no GET
 
+                var response = await client.SendAsync(apiRequest);
                 if (!response.IsSuccessStatusCode)
-                    return BadRequest($"Erro ao conectar com a API da 42: {response.StatusCode}");
+                    return BadRequest("Erro ao conectar com a API da 42.");
 
                 var profileJson = await response.Content.ReadAsStringAsync();
 
