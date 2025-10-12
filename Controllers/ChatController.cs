@@ -155,16 +155,13 @@ namespace CvAssistantWeb.Controllers
         }
     }
     
-   public class School42Controller : Controller
+    public class School42Controller : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        //private readonly string _clientId = "CLI_ID";     
-        //private readonly string _clientSecret = "CLI_SECRET"; 
-        private readonly string _clientId = "u-s4t2ud-378086f35e7f071a05d08033df7b1df2f4f88adfb13773c01bb9af0fc097900f";
-        private readonly string _clientSecret = "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";
 
-        private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
-        private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte"; // <-- login fixo
+        // ⚡ Token fixo obtido via curl (válido por algumas horas)
+        private readonly string _accessToken = "4ff5a85236fcd06b5b04b5617486985f12e420ad3f68569cba680c6d221348bf";
+        private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte";
 
         public School42Controller(IHttpClientFactory httpClientFactory)
         {
@@ -177,39 +174,17 @@ namespace CvAssistantWeb.Controllers
             try
             {
                 var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", _accessToken);
 
-                // 1️⃣ Obter access_token via Client Credentials
-                var tokenRequest = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string,string>("grant_type","client_credentials"),
-                    new KeyValuePair<string,string>("client_id", _clientId),
-                    new KeyValuePair<string,string>("client_secret", _clientSecret)
-                });
-
-                var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
-                if (!tokenResponse.IsSuccessStatusCode)
-                    return BadRequest("Erro ao obter token da API 42.");
-
-                var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
-                using var tokenDoc = JsonDocument.Parse(tokenJson);
-                var accessToken = tokenDoc.RootElement.GetProperty("access_token").GetString();
-
-                if (string.IsNullOrEmpty(accessToken))
-                    return BadRequest("Token da API 42 é nulo ou inválido.");
-
-                // 2️⃣ Chamar a API da 42 com login fixo
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                 var response = await client.GetAsync(_apiUrl);
-
                 if (!response.IsSuccessStatusCode)
                     return BadRequest("Erro ao conectar com a API da 42.");
 
                 var profileJson = await response.Content.ReadAsStringAsync();
-
-                // Retorna JSON diretamente para o JS processar
                 return Content(profileJson, "application/json");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 return BadRequest($"Erro interno: {ex.Message}");
             }
