@@ -158,10 +158,10 @@ namespace CvAssistantWeb.Controllers
    public class School42Controller : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly string _clientId = "CLI_ID";       // Substitua pelo seu client_id
-        private readonly string _clientSecret = "CLI_SECRET"; // Substitua pelo seu client_secret
+        private readonly string _clientId = "CLI_ID";     
+        private readonly string _clientSecret = "CLI_SECRET"; 
         private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
-        private readonly string _apiUrl = "https://api.intra.42.fr/v2/me";
+        private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte"; // <-- login fixo
 
         public School42Controller(IHttpClientFactory httpClientFactory)
         {
@@ -175,7 +175,7 @@ namespace CvAssistantWeb.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
 
-                // 1️⃣ Obter access_token
+                // 1️⃣ Obter access_token via Client Credentials
                 var tokenRequest = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string,string>("grant_type","client_credentials"),
@@ -194,7 +194,7 @@ namespace CvAssistantWeb.Controllers
                 if (string.IsNullOrEmpty(accessToken))
                     return BadRequest("Token da API 42 é nulo ou inválido.");
 
-                // 2️⃣ Chamar a API da 42
+                // 2️⃣ Chamar a API da 42 com login fixo
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                 var response = await client.GetAsync(_apiUrl);
 
@@ -203,7 +203,7 @@ namespace CvAssistantWeb.Controllers
 
                 var profileJson = await response.Content.ReadAsStringAsync();
 
-                // Retorna JSON diretamente
+                // Retorna JSON diretamente para o JS processar
                 return Content(profileJson, "application/json");
             }
             catch (Exception ex)
