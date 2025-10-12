@@ -125,13 +125,12 @@ input::placeholder, textarea::placeholder {
             if (!res.ok) throw new Error("Failed to fetch 42 API");
             const data = await res.json();
 
-            // Exemplo de renderização simplificada
             const cursus = data.cursus_users?.[0];
             const projects = data.projects_users?.slice(0, 5) || [];
 
             div.innerHTML = `
             <h5>${data.login} (${data.usual_full_name})</h5>
-            <p><strong>Level:</strong> ${cursus.level.toFixed(2)}</p>
+            ${cursus ? `<p><strong>Level:</strong> ${cursus.level.toFixed(2)}</p>` : ""}
             <ul class="list-unstyled text-start mx-auto" style="max-width:400px;">
                 ${projects.map(p => `<li>• ${p.project.name} - ${p.final_mark ?? 'In progress'}</li>`).join("")}
             </ul>
@@ -140,6 +139,9 @@ input::placeholder, textarea::placeholder {
             div.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
         }
     }
+
+    // 🔹 Executa automaticamente ao carregar a página
+    document.addEventListener("DOMContentLoaded", fetch42Profile);
 
     // === Logic unchanged, but replies slightly styled ===
 

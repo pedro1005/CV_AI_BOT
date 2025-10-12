@@ -155,45 +155,61 @@ namespace CvAssistantWeb.Controllers
         }
     }
     
-    public class School42Controller : Controller
+   public class School42Controller : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string clientId = "CLI_ID";
-        private readonly string clientSecret = "CLI_SECRET";
-        private readonly string tokenUrl = "https://api.intra.42.fr/oauth/token";
-        private readonly string apiUrl = "https://api.intra.42.fr/v2/me";
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly string _clientId = "CLI_ID";       // Substitua pelo seu client_id
+        private readonly string _clientSecret = "CLI_SECRET"; // Substitua pelo seu client_secret
+        private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
+        private readonly string _apiUrl = "https://api.intra.42.fr/v2/me";
 
-        public School42Controller(HttpClient httpClient)
+        public School42Controller(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet("/School42/Profile")]
         public async Task<IActionResult> GetProfile()
         {
-            // 1. Obter access_token
-            var tokenRequest = new FormUrlEncodedContent(new[]
+            try
             {
-                new KeyValuePair<string,string>("grant_type", "client_credentials"),
-                new KeyValuePair<string,string>("client_id", clientId),
-                new KeyValuePair<string,string>("client_secret", clientSecret)
-            });
+                var client = _httpClientFactory.CreateClient();
 
-            var tokenResponse = await _httpClient.PostAsync(tokenUrl, tokenRequest);
-            var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
-            using var tokenDoc = JsonDocument.Parse(tokenJson);
-            var accessToken = tokenDoc.RootElement.GetProperty("access_token").GetString();
+                // 1️⃣ Obter access_token
+                var tokenRequest = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string,string>("grant_type","client_credentials"),
+                    new KeyValuePair<string,string>("client_id", _clientId),
+                    new KeyValuePair<string,string>("client_secret", _clientSecret)
+                });
 
-            // 2. Chamar a API da 42
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+                var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
+                if (!tokenResponse.IsSuccessStatusCode)
+                    return BadRequest("Erro ao obter token da API 42.");
 
-            var response = await _httpClient.GetAsync(apiUrl);
-            if (!response.IsSuccessStatusCode)
-                return BadRequest("Erro ao conectar com a API da 42.");
+                var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+                using var tokenDoc = JsonDocument.Parse(tokenJson);
+                var accessToken = tokenDoc.RootElement.GetProperty("access_token").GetString();
 
-            var profileJson = await response.Content.ReadAsStringAsync();
-            return Content(profileJson, "application/json");
+                if (string.IsNullOrEmpty(accessToken))
+                    return BadRequest("Token da API 42 é nulo ou inválido.");
+
+                // 2️⃣ Chamar a API da 42
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                var response = await client.GetAsync(_apiUrl);
+
+                if (!response.IsSuccessStatusCode)
+                    return BadRequest("Erro ao conectar com a API da 42.");
+
+                var profileJson = await response.Content.ReadAsStringAsync();
+
+                // Retorna JSON diretamente
+                return Content(profileJson, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro interno: {ex.Message}");
+            }
         }
     }
 }
