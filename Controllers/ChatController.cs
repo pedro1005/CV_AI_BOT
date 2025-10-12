@@ -161,7 +161,7 @@ namespace CvAssistantWeb.Controllers
         private readonly string _clientId = "u-s4t2ud-378086f35e7f071a05d08033df7b1df2f4f88adfb13773c01bb9af0fc097900f";
         private readonly string _clientSecret = "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";
         private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
-        private readonly string _apiUrl = "https://api.intra.42.fr/v2/me"; // <- sempre seu próprio perfil
+        private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte"; // login fixo
 
         public School42Controller(IHttpClientFactory httpClientFactory)
         {
@@ -175,6 +175,9 @@ namespace CvAssistantWeb.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
 
+                // 🚨 Adiciona User-Agent obrigatório para evitar 403
+                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0");
+
                 // 1️⃣ Obter access_token via Client Credentials
                 var tokenRequest = new FormUrlEncodedContent(new[]
                 {
@@ -185,7 +188,7 @@ namespace CvAssistantWeb.Controllers
 
                 var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
                 if (!tokenResponse.IsSuccessStatusCode)
-                    return BadRequest("Erro ao obter token da API 42.");
+                    return BadRequest($"Erro ao obter token da API 42: {tokenResponse.StatusCode}");
 
                 var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
                 using var tokenDoc = JsonDocument.Parse(tokenJson);
@@ -194,16 +197,17 @@ namespace CvAssistantWeb.Controllers
                 if (string.IsNullOrEmpty(accessToken))
                     return BadRequest("Token da API 42 é nulo ou inválido.");
 
-                // 2️⃣ Chamar a API da 42 para seu próprio perfil
+                // 2️⃣ Chamar a API da 42 com login fixo
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                 var response = await client.GetAsync(_apiUrl);
 
                 if (!response.IsSuccessStatusCode)
-                    return BadRequest("Erro ao conectar com a API da 42.");
+                    return BadRequest($"Erro ao conectar com a API da 42: {response.StatusCode}");
 
                 var profileJson = await response.Content.ReadAsStringAsync();
 
-                return Content(profileJson, "application/json"); // JS processará os dados
+                // Retorna JSON diretamente para o JS processar
+                return Content(profileJson, "application/json");
             }
             catch (Exception ex)
             {
