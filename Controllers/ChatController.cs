@@ -158,8 +158,11 @@ namespace CvAssistantWeb.Controllers
     public class School42Controller : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
+
+        // Seus dados de API 42
         private readonly string _clientId = "u-s4t2ud-378086f35e7f071a05d08033df7b1df2f4f88adfb13773c01bb9af0fc097900f";
         private readonly string _clientSecret = "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";
+
         private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
         private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte"; // login fixo
 
@@ -175,21 +178,15 @@ namespace CvAssistantWeb.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
 
-                // 1️⃣ Preparar request de token usando HttpRequestMessage
-                var tokenRequest = new HttpRequestMessage(HttpMethod.Post, _tokenUrl)
+                // 1️⃣ Obter access_token via Client Credentials
+                var tokenRequest = new FormUrlEncodedContent(new[]
                 {
-                    Content = new FormUrlEncodedContent(new[]
-                    {
-                        new KeyValuePair<string,string>("grant_type","client_credentials"),
-                        new KeyValuePair<string,string>("client_id", _clientId),
-                        new KeyValuePair<string,string>("client_secret", _clientSecret)
-                    })
-                };
+                    new KeyValuePair<string,string>("grant_type","client_credentials"),
+                    new KeyValuePair<string,string>("client_id", _clientId),
+                    new KeyValuePair<string,string>("client_secret", _clientSecret)
+                });
 
-                // 🔹 User-Agent obrigatório pela 42 API
-                tokenRequest.Headers.Add("User-Agent", "Pedro-CV-App/1.0");
-
-                var tokenResponse = await client.SendAsync(tokenRequest);
+                var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
                 if (!tokenResponse.IsSuccessStatusCode)
                     return BadRequest("Erro ao obter token da API 42.");
 
@@ -201,11 +198,10 @@ namespace CvAssistantWeb.Controllers
                     return BadRequest("Token da API 42 é nulo ou inválido.");
 
                 // 2️⃣ Chamar a API da 42 com login fixo
-                var apiRequest = new HttpRequestMessage(HttpMethod.Get, _apiUrl);
-                apiRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                apiRequest.Headers.Add("User-Agent", "Pedro-CV-App/1.0"); // User-Agent também no GET
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0"); // ← obrigatório
 
-                var response = await client.SendAsync(apiRequest);
+                var response = await client.GetAsync(_apiUrl);
                 if (!response.IsSuccessStatusCode)
                     return BadRequest("Erro ao conectar com a API da 42.");
 

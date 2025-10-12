@@ -9,7 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="" />
+    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AI_BOT_GIT.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AI_BOT_GIT.dir/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -112,7 +114,7 @@
       <workItem from="1759970836979" duration="1220000" />
       <workItem from="1760007194531" duration="13041000" />
       <workItem from="1760089638575" duration="11478000" />
-      <workItem from="1760221727380" duration="5439000" />
+      <workItem from="1760221727380" duration="6303000" />
     </task>
     <servers />
   </component>
