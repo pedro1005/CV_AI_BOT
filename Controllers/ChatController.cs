@@ -158,8 +158,11 @@ namespace CvAssistantWeb.Controllers
    public class School42Controller : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly string _clientId = "CLI_ID";     
-        private readonly string _clientSecret = "CLI_SECRET"; 
+        //private readonly string _clientId = "CLI_ID";     
+        //private readonly string _clientSecret = "CLI_SECRET"; 
+        private readonly string _clientId = "u-s4t2ud-378086f35e7f071a05d08033df7b1df2f4f88adfb13773c01bb9af0fc097900f";
+        private readonly string _clientSecret = "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";
+
         private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
         private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte"; // <-- login fixo
 
