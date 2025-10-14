@@ -155,59 +155,63 @@ namespace CvAssistantWeb.Controllers
         }
     }
     
-    public class School42Controller : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class School42Controller : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-
-        // Seus dados de API 42
-        private readonly string _clientId = "u-s4t2ud-378086f35e7f071a05d08033df7b1df2f4f88adfb13773c01bb9af0fc097900f";
-        private readonly string _clientSecret = "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";
+        private readonly IConfiguration _configuration;
 
         private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
-        private readonly string _apiUrl = "https://api.intra.42.fr/v2/users/pedmonte"; // login fixo
 
-        public School42Controller(IHttpClientFactory httpClientFactory)
+        public School42Controller(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
-        [HttpGet("/School42/Profile")]
-        public async Task<IActionResult> GetProfile()
+        [HttpGet("Profile/{login}")]
+        public async Task<IActionResult> GetProfile(string login)
         {
             try
             {
                 var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0");
+
+                // Ler credenciais do app no appsettings.json
+                var clientId = _configuration["School42:ClientId"];
+                var clientSecret = _configuration["School42:ClientSecret"];
 
                 // 1️⃣ Obter access_token via Client Credentials
                 var tokenRequest = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string,string>("grant_type","client_credentials"),
-                    new KeyValuePair<string,string>("client_id", _clientId),
-                    new KeyValuePair<string,string>("client_secret", _clientSecret)
+                    new KeyValuePair<string,string>("client_id", clientId),
+                    new KeyValuePair<string,string>("client_secret", clientSecret)
                 });
 
                 var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
-                if (!tokenResponse.IsSuccessStatusCode)
-                    return BadRequest("Erro ao obter token da API 42.");
+                var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
 
-                var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
-                using var tokenDoc = JsonDocument.Parse(tokenJson);
+                if (!tokenResponse.IsSuccessStatusCode)
+                    return BadRequest($"Erro ao obter token (status {tokenResponse.StatusCode}): {tokenContent}");
+
+                using var tokenDoc = JsonDocument.Parse(tokenContent);
                 var accessToken = tokenDoc.RootElement.GetProperty("access_token").GetString();
 
                 if (string.IsNullOrEmpty(accessToken))
                     return BadRequest("Token da API 42 é nulo ou inválido.");
 
-                // 2️⃣ Chamar a API da 42 com login fixo
+                // 2️⃣ Chamar a API da 42 com login
+                var apiUrl = $"https://api.intra.42.fr/v2/users/{login}";
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0"); // ← obrigatório
 
-                var response = await client.GetAsync(_apiUrl);
-                if (!response.IsSuccessStatusCode)
-                    return BadRequest("Erro ao conectar com a API da 42.");
-
+                var response = await client.GetAsync(apiUrl);
                 var profileJson = await response.Content.ReadAsStringAsync();
 
-                // Retorna JSON diretamente para o JS processar
+                if (!response.IsSuccessStatusCode)
+                    return BadRequest($"Erro ao buscar perfil (status {response.StatusCode}): {profileJson}");
+
                 return Content(profileJson, "application/json");
             }
             catch (Exception ex)
