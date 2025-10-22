@@ -161,13 +161,15 @@ namespace CvAssistantWeb.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<School42Controller> _logger;
 
         private readonly string _tokenUrl = "https://api.intra.42.fr/oauth/token";
 
-        public School42Controller(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public School42Controller(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<School42Controller> logger)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpGet("Profile/{login}")]
@@ -175,12 +177,17 @@ namespace CvAssistantWeb.Controllers
         {
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0");
+                // 🔹 Log inicial
+                _logger.LogInformation("GetProfile called for login: {Login}", login);
 
-                // Ler credenciais do app no appsettings.json
+                // 🔹 Ler valores do appsettings
                 var clientId = _configuration["School42:ClientId"];
                 var clientSecret = _configuration["School42:ClientSecret"];
+                _logger.LogInformation("ClientId from appsettings: {ClientId}", clientId);
+                _logger.LogInformation("ClientSecret from appsettings: {ClientSecret}", clientSecret);
+
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0");
 
                 // 1️⃣ Obter access_token via Client Credentials
                 var tokenRequest = new FormUrlEncodedContent(new[]
@@ -192,12 +199,14 @@ namespace CvAssistantWeb.Controllers
 
                 var tokenResponse = await client.PostAsync(_tokenUrl, tokenRequest);
                 var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+                _logger.LogInformation("Token response content: {TokenContent}", tokenContent);
 
                 if (!tokenResponse.IsSuccessStatusCode)
                     return BadRequest($"Erro ao obter token (status {tokenResponse.StatusCode}): {tokenContent}");
 
                 using var tokenDoc = JsonDocument.Parse(tokenContent);
                 var accessToken = tokenDoc.RootElement.GetProperty("access_token").GetString();
+                _logger.LogInformation("Access token obtained: {AccessToken}", accessToken);
 
                 if (string.IsNullOrEmpty(accessToken))
                     return BadRequest("Token da API 42 é nulo ou inválido.");
@@ -209,6 +218,8 @@ namespace CvAssistantWeb.Controllers
                 var response = await client.GetAsync(apiUrl);
                 var profileJson = await response.Content.ReadAsStringAsync();
 
+                _logger.LogInformation("Profile API response length: {Length}", profileJson.Length);
+
                 if (!response.IsSuccessStatusCode)
                     return BadRequest($"Erro ao buscar perfil (status {response.StatusCode}): {profileJson}");
 
@@ -216,6 +227,7 @@ namespace CvAssistantWeb.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro interno no GetProfile");
                 return BadRequest($"Erro interno: {ex.Message}");
             }
         }
