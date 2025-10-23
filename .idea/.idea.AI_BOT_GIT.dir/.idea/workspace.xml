@@ -11,19 +11,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AI_BOT_GIT.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AI_BOT_GIT.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Controllers/ChatController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/ChatController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Folder.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Folder.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Views/Chat/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/Views/Chat/Index.cshtml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net9.0/CvAssistantWeb.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net9.0/CvAssistantWeb.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net9.0/CvAssistantWeb.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net9.0/CvAssistantWeb.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.sourcelink.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/ref/CvAssistantWeb.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/ref/CvAssistantWeb.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/refint/CvAssistantWeb.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/refint/CvAssistantWeb.dll" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +124,7 @@
       <workItem from="1760089638575" duration="11478000" />
       <workItem from="1760221727380" duration="7117000" />
       <workItem from="1760482786498" duration="2152000" />
-      <workItem from="1761148329018" duration="2074000" />
+      <workItem from="1761148329018" duration="3208000" />
     </task>
     <servers />
   </component>

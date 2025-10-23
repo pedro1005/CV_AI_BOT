@@ -77,12 +77,12 @@ namespace CvAssistantWeb.Controllers
 
         private async Task<string?> GetAccessTokenAsync(HttpClient client)
         {
-            // ✅ Return cached token if available
             if (_cache.TryGetValue("42_access_token", out string cachedToken))
                 return cachedToken;
 
             _logger.LogInformation("Fetching new 42 access token...");
 
+            // Prepare the request content
             var tokenRequest = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("grant_type", "client_credentials"),
@@ -90,23 +90,29 @@ namespace CvAssistantWeb.Controllers
                 new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
             });
 
-            var response = await client.PostAsync(TokenUrl, tokenRequest);
-            var tokenContent = await response.Content.ReadAsStringAsync();
+            // Important: set a User-Agent so Cloudflare is less likely to block
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("CvAssistantWeb/1.0");
+
+            // Make the POST request
+            var response = await client.PostAsync("https://api.intra.42.fr/oauth/token", tokenRequest);
+            var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("Token request failed: {Content}", tokenContent);
+                _logger.LogError("Token request failed: {Content}", content);
                 return null;
             }
 
-            using var doc = JsonDocument.Parse(tokenContent);
+            using var doc = JsonDocument.Parse(content);
             var accessToken = doc.RootElement.GetProperty("access_token").GetString();
             var expiresIn = doc.RootElement.GetProperty("expires_in").GetInt32();
 
-            _cache.Set("42_access_token", accessToken, TimeSpan.FromSeconds(expiresIn - 30)); // Renew slightly early
-            _logger.LogInformation("New 42 access token cached for {Seconds}s", expiresIn);
+            // Cache the token slightly before it expires
+            _cache.Set("42_access_token", accessToken, TimeSpan.FromSeconds(expiresIn - 30));
+            _logger.LogInformation("Access token cached for {Seconds}s", expiresIn);
 
             return accessToken;
         }
+
     }
 }
