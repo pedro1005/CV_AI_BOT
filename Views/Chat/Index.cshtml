@@ -119,9 +119,11 @@ input::placeholder, textarea::placeholder {
     async function fetch42Profile() {
         const div = document.getElementById("school42Profile");
         div.innerHTML = `<div class="spinner-border text-primary"></div> Loading...`;
+        
+        const login = "pedmonte";
 
         try {
-            const res = await fetch("/School42/Profile");
+            const res = await fetch(`/School42/Profile/${login}`);
             if (!res.ok) throw new Error("Failed to fetch 42 API");
             const data = await res.json();
 
@@ -139,6 +141,7 @@ input::placeholder, textarea::placeholder {
             div.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
         }
     }
+
 
     // 🔹 Executa automaticamente ao carregar a página
     document.addEventListener("DOMContentLoaded", fetch42Profile);
