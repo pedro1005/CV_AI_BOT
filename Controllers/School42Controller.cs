@@ -37,7 +37,7 @@ namespace CvAssistantWeb.Controllers
             {
                 _logger.LogInformation("Fetching 42 profile for user: {Login}", login);
 
-                var client = _httpClientFactory.CreateClient("School42");
+                var client = _httpClientFactory.CreateClient();
 
                 // 1️⃣ Get (or reuse) cached token
                 var accessToken = await GetAccessTokenAsync(client);
@@ -82,31 +82,27 @@ namespace CvAssistantWeb.Controllers
 
             _logger.LogInformation("Fetching new 42 access token...");
 
-            // Prepare the request content
-            var tokenRequest = new FormUrlEncodedContent(new[]
+            using var tokenRequest = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("grant_type", "client_credentials"),
                 new KeyValuePair<string, string>("client_id", _options.ClientId),
                 new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
             });
 
-            // Set browser-like headers to avoid Cloudflare blocks
+            // Optional: set browser-like headers to avoid Cloudflare blocks
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 CvAssistantWeb/1.0"
             );
-            client.DefaultRequestHeaders.Accept.ParseAdd("application/json, text/plain, */*");
-            client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             client.DefaultRequestHeaders.Connection.ParseAdd("keep-alive");
 
-            // Make the POST request
             var response = await client.PostAsync(TokenUrl, tokenRequest);
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Token request failed: {Content}", content);
-                _logger.LogWarning("Cloudflare might be blocking the request. Consider IP whitelisting.");
                 return null;
             }
 
@@ -114,12 +110,18 @@ namespace CvAssistantWeb.Controllers
             var accessToken = doc.RootElement.GetProperty("access_token").GetString();
             var expiresIn = doc.RootElement.GetProperty("expires_in").GetInt32();
 
-            // Cache the token slightly before it expires
-            _cache.Set("42_access_token", accessToken, TimeSpan.FromSeconds(expiresIn - 30));
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                _logger.LogError("Access token not found in the response.");
+                return null;
+            }
+
+            // Cache token slightly before it expires
+            _cache.Set("42_access_token", accessToken, TimeSpan.FromSeconds(Math.Max(expiresIn - 30, 30)));
             _logger.LogInformation("Access token cached for {Seconds}s", expiresIn);
 
             return accessToken;
         }
-
     }
 }
+
