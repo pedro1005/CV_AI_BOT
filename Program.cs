@@ -7,10 +7,13 @@ using CvAssistantWeb.Data;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using CvAssistantWeb.Options;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add MVC controllers and views
+// =======================
+// 🔹 MVC CONFIG
+// =======================
 builder.Services.AddControllersWithViews();
 
 
@@ -57,7 +60,7 @@ builder.Services.AddHttpClient("CometAPI", client =>
 {
     client.BaseAddress = new Uri("https://api.cometapi.com/v1/");
     client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", cometApiKey);
+        new AuthenticationHeaderValue("Bearer", cometApiKey);
     client.DefaultRequestHeaders.Add("X-Title", "CV Assistant");
 });
 
@@ -65,18 +68,28 @@ builder.Services.AddHttpClient("CometAPI", client =>
 // =======================
 // 🔹 42 API CONFIG + CLIENT
 // =======================
-// Bind the "School42" section from appsettings.json to a strongly typed class
 builder.Services.Configure<School42Options>(
     builder.Configuration.GetSection("School42")
 );
 
-// Add memory cache for token reuse
+// Add memory cache for access token reuse
 builder.Services.AddMemoryCache();
 
-// Register typed HttpClient for 42 API
+// ✅ Register robust 42 API HttpClient (Cloudflare bypass headers)
 builder.Services.AddHttpClient("School42", client =>
 {
-    client.DefaultRequestHeaders.Add("User-Agent", "Pedro-CV-App/1.0");
+    client.BaseAddress = new Uri("https://api.intra.42.fr/");
+    client.Timeout = TimeSpan.FromSeconds(20);
+
+    // Browser-like headers to avoid Cloudflare 403 “Just a moment” challenge
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    client.DefaultRequestHeaders.Connection.Add("keep-alive");
+    client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+    client.DefaultRequestHeaders.UserAgent.ParseAdd(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+        "AppleWebKit/537.36 (KHTML, like Gecko) " +
+        "Chrome/129.0.0.0 Safari/537.36"
+    );
 });
 
 
@@ -110,3 +123,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+

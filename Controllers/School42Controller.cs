@@ -39,12 +39,12 @@ namespace CvAssistantWeb.Controllers
 
                 var client = _httpClientFactory.CreateClient("School42");
 
-                // 1️⃣ Get (or reuse) the cached token
+                // 1️⃣ Get (or reuse) cached token
                 var accessToken = await GetAccessTokenAsync(client);
                 if (string.IsNullOrEmpty(accessToken))
                 {
                     _logger.LogWarning("Access token could not be obtained.");
-                    return BadRequest("Failed to obtain access token.");
+                    return BadRequest("Failed to obtain access token from 42 API.");
                 }
 
                 // 2️⃣ Call the 42 API
@@ -56,7 +56,7 @@ namespace CvAssistantWeb.Controllers
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("Error fetching profile for {Login}: {StatusCode}", login, response.StatusCode);
+                    _logger.LogWarning("Error fetching profile for {Login}: {StatusCode} - {Body}", login, response.StatusCode, profileJson);
                     return BadRequest(new
                     {
                         error = "ProfileFetchError",
@@ -90,29 +90,53 @@ namespace CvAssistantWeb.Controllers
                 new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
             });
 
-            // Important: set a User-Agent so Cloudflare is less likely to block
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("CvAssistantWeb/1.0");
+            // 🧠 Cloudflare mitigation headers
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Connection.Add("keep-alive");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36");
+            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
 
-            // Make the POST request
-            var response = await client.PostAsync("https://api.intra.42.fr/oauth/token", tokenRequest);
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                _logger.LogError("Token request failed: {Content}", content);
+                var response = await client.PostAsync(TokenUrl, tokenRequest);
+                var content = await response.Content.ReadAsStringAsync();
+
+                // 🪲 Cloudflare detection
+                if ((int)response.StatusCode == 403 && content.Contains("Just a moment", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogError("Cloudflare blocked the OAuth token request. Response: {HtmlSnippet}", content[..Math.Min(400, content.Length)]);
+                    _logger.LogError("If this persists, contact 42 support to whitelist your server IP.");
+                    return null;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Token request failed with {Status}: {Body}", response.StatusCode, content);
+                    return null;
+                }
+
+                using var doc = JsonDocument.Parse(content);
+                var accessToken = doc.RootElement.GetProperty("access_token").GetString();
+                var expiresIn = doc.RootElement.GetProperty("expires_in").GetInt32();
+
+                // Cache token with safety margin
+                _cache.Set("42_access_token", accessToken, TimeSpan.FromSeconds(expiresIn - 60));
+                _logger.LogInformation("Access token cached for {Seconds}s", expiresIn - 60);
+
+                return accessToken;
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.LogError(httpEx, "HTTP error while requesting 42 OAuth token.");
                 return null;
             }
-
-            using var doc = JsonDocument.Parse(content);
-            var accessToken = doc.RootElement.GetProperty("access_token").GetString();
-            var expiresIn = doc.RootElement.GetProperty("expires_in").GetInt32();
-
-            // Cache the token slightly before it expires
-            _cache.Set("42_access_token", accessToken, TimeSpan.FromSeconds(expiresIn - 30));
-            _logger.LogInformation("Access token cached for {Seconds}s", expiresIn);
-
-            return accessToken;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during token request.");
+                return null;
+            }
         }
-
     }
 }
