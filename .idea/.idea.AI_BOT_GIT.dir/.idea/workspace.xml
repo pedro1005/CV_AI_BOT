@@ -9,11 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.AI_BOT_GIT.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AI_BOT_GIT.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net9.0/CvAssistantWeb.AssemblyInfoInputs.cache" afterDir="false" />
-    </list>
+    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -127,7 +123,7 @@
       <workItem from="1760221727380" duration="7117000" />
       <workItem from="1760482786498" duration="2152000" />
       <workItem from="1761148329018" duration="3861000" />
-      <workItem from="1761430967820" duration="754000" />
+      <workItem from="1761430967820" duration="1276000" />
     </task>
     <servers />
   </component>
