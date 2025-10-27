@@ -129,59 +129,71 @@ namespace CvAssistantWeb.Controllers
         // 4️⃣ Access token helper
         // =========================
         private async Task<string?> GetAccessTokenAsync(HttpClient client)
+{
+    if (_cache.TryGetValue("42_access_token", out string cachedToken))
+        return cachedToken;
+
+    _logger.LogInformation("Fetching new 42 access token...");
+
+    using var tokenRequest = new FormUrlEncodedContent(new[]
+    {
+        new KeyValuePair<string, string>("grant_type", "client_credentials"),
+        new KeyValuePair<string, string>("client_id", _options.ClientId),
+        new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
+    });
+
+    client.DefaultRequestHeaders.Clear();
+    client.DefaultRequestHeaders.UserAgent.Clear();
+    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CvAssistantWeb", "1.0"));
+    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(TokenRequest)"));
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+
+    var response = await client.PostAsync(TokenUrl, tokenRequest);
+    var content = await response.Content.ReadAsStringAsync();
+
+    if (!response.IsSuccessStatusCode)
+    {
+        // Log full response from 42 API
+        _logger.LogError("Token request failed. StatusCode: {StatusCode}, ResponseBody: {Content}", 
+                         response.StatusCode, content);
+        return null;
+    }
+
+    try
+    {
+        using var doc = JsonDocument.Parse(content);
+        var root = doc.RootElement;
+
+        if (!root.TryGetProperty("access_token", out var tokenElement) || string.IsNullOrEmpty(tokenElement.GetString()))
         {
-            if (_cache.TryGetValue("42_access_token", out string cachedToken))
-                return cachedToken;
-
-            _logger.LogInformation("Fetching new 42 access token...");
-
-            using var tokenRequest = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                new KeyValuePair<string, string>("client_id", _options.ClientId),
-                new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
-            });
-
-            client.DefaultRequestHeaders.Clear();
-            client.DefaultRequestHeaders.UserAgent.Clear();
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CvAssistantWeb", "1.0"));
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(TokenRequest)"));
-            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-
-            var response = await client.PostAsync(TokenUrl, tokenRequest);
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError("Token request failed: {StatusCode} {Content}", response.StatusCode, content);
-                return null;
-            }
-
-            try
-            {
-                using var doc = JsonDocument.Parse(content);
-                var root = doc.RootElement;
-
-                if (!root.TryGetProperty("access_token", out var tokenElement) || string.IsNullOrEmpty(tokenElement.GetString()))
-                {
-                    _logger.LogError("Access token not found in response: {Content}", content);
-                    return null;
-                }
-
-                var accessToken = tokenElement.GetString()!;
-                var expiresIn = root.TryGetProperty("expires_in", out var expiresElement) ? expiresElement.GetInt32() : 3600;
-
-                var cacheDuration = TimeSpan.FromSeconds(Math.Max(expiresIn - 30, 30));
-                _cache.Set("42_access_token", accessToken, cacheDuration);
-
-                _logger.LogInformation("Access token cached for {Seconds}s", cacheDuration.TotalSeconds);
-                return accessToken;
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, "Failed to parse token JSON: {Content}", content);
-                return null;
-            }
+            _logger.LogError("Access token not found in response: {Content}", content);
+            return null;
         }
+
+        var accessToken = tokenElement.GetString()!;
+        var expiresIn = root.TryGetProperty("expires_in", out var expiresElement) ? expiresElement.GetInt32() : 3600;
+
+        var cacheDuration = TimeSpan.FromSeconds(Math.Max(expiresIn - 30, 30));
+        _cache.Set("42_access_token", accessToken, cacheDuration);
+
+        _logger.LogInformation("Access token cached for {Seconds}s", cacheDuration.TotalSeconds);
+        return accessToken;
+    }
+    catch (JsonException ex)
+    {
+        _logger.LogError(ex, "Failed to parse token JSON: {Content}", content);
+        return null;
+    }
+}
+        [HttpGet("TestToken")]
+        public async Task<IActionResult> TestToken()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var token = await GetAccessTokenAsync(client);
+            if (string.IsNullOrEmpty(token))
+                return BadRequest("Token fetch failed; check logs.");
+            return Ok(new { token = "<redacted>" });
+        }
+
     }
 }
