@@ -139,7 +139,8 @@ public async Task<IActionResult> GetEgressIp()
     try
     {
         var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("CvAssistantWeb/diagnostic/1.0");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("CvAssistantWeb-Diagnostic/1.0");
+
 
         // Use a simple egress IP service
         var resp = await client.GetAsync("https://ifconfig.co/json");
@@ -175,7 +176,8 @@ public async Task<IActionResult> DiagnoseProfile(string login)
         var apiUrl = $"https://api.intra.42.fr/v2/users/{login}";
         using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        request.Headers.UserAgent.ParseAdd("CvAssistantWeb/diagnostic/1.0");
+        request.Headers.UserAgent.ParseAdd("CvAssistantWeb-Diagnostic/1.0");
+
         request.Headers.Accept.ParseAdd("application/json");
 
         // Send and capture response
