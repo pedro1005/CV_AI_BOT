@@ -132,6 +132,12 @@ namespace CvAssistantWeb.Controllers
                 return null;
             }
         }
+        [HttpGet("CheckOptions")]
+        public IActionResult CheckOptions()
+        {
+            _logger.LogInformation("School42 ClientId: {ClientId}", _options.ClientId);
+            return Ok(new { clientId = _options.ClientId.Length > 0 ? "<set>" : "<missing>" });
+        }
         // GET /School42/EgressIp
 [HttpGet("EgressIp")]
 public async Task<IActionResult> GetEgressIp()
