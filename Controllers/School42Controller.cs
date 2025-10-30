@@ -76,16 +76,16 @@ namespace CvAssistantWeb.Controllers
         [HttpGet("DiagnoseProfile/{login}")]
         public async Task<IActionResult> DiagnoseProfile(string login)
         {
+            var client = _httpClientFactory.CreateClient();
+
             try
             {
-                var client = _httpClientFactory.CreateClient();
-
                 // Get or fetch access token
                 var accessToken = await GetAccessTokenAsync(client);
                 if (string.IsNullOrEmpty(accessToken))
                 {
                     _logger.LogWarning("Access token could not be obtained (diagnostics).");
-                    return BadRequest("Failed to obtain access token from 42 API.");
+                    return await ReturnFallbackProfileAsync(login, "Failed to obtain access token from 42 API.");
                 }
 
                 var apiUrl = $"https://api.intra.42.fr/v2/users/{login}";
@@ -97,12 +97,19 @@ namespace CvAssistantWeb.Controllers
                 request.Headers.Accept.ParseAdd("application/json");
 
                 var response = await client.SendAsync(request);
+                var body = await response.Content.ReadAsStringAsync();
 
-                // Collect headers
+                // If request failed → use fallback JSON
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("42 API call failed with {Status}. Falling back to local JSON.", response.StatusCode);
+                    return await ReturnFallbackProfileAsync(login, $"42 API returned {response.StatusCode}");
+                }
+
+                // Log diagnostic headers
                 var responseHeaders = response.Headers.Concat(response.Content.Headers)
                     .ToDictionary(h => h.Key, h => string.Join(", ", h.Value));
 
-                var body = await response.Content.ReadAsStringAsync();
                 var truncatedBody = body.Length > 2000 ? body.Substring(0, 2000) + "..." : body;
 
                 // Log Cloudflare info if present
@@ -120,8 +127,8 @@ namespace CvAssistantWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in DiagnoseProfile for login {Login}", login);
-                return StatusCode(500, new { error = "InternalError", message = ex.Message });
+                _logger.LogError(ex, "Unexpected error fetching 42 profile for {Login}", login);
+                return await ReturnFallbackProfileAsync(login, ex.Message);
             }
         }
 
@@ -129,62 +136,92 @@ namespace CvAssistantWeb.Controllers
         // 4️⃣ Access token helper
         // =========================
         private async Task<string?> GetAccessTokenAsync(HttpClient client)
-{
-    if (_cache.TryGetValue("42_access_token", out string cachedToken))
-        return cachedToken;
-
-    _logger.LogInformation("Fetching new 42 access token...");
-
-    using var tokenRequest = new FormUrlEncodedContent(new[]
-    {
-        new KeyValuePair<string, string>("grant_type", "client_credentials"),
-        new KeyValuePair<string, string>("client_id", _options.ClientId),
-        new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
-    });
-
-    client.DefaultRequestHeaders.Clear();
-    client.DefaultRequestHeaders.UserAgent.Clear();
-    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CvAssistantWeb", "1.0"));
-    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(TokenRequest)"));
-    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-
-    var response = await client.PostAsync(TokenUrl, tokenRequest);
-    var content = await response.Content.ReadAsStringAsync();
-
-    if (!response.IsSuccessStatusCode)
-    {
-        // Log full response from 42 API
-        _logger.LogError("Token request failed. StatusCode: {StatusCode}, ResponseBody: {Content}", 
-                         response.StatusCode, content);
-        return null;
-    }
-
-    try
-    {
-        using var doc = JsonDocument.Parse(content);
-        var root = doc.RootElement;
-
-        if (!root.TryGetProperty("access_token", out var tokenElement) || string.IsNullOrEmpty(tokenElement.GetString()))
         {
-            _logger.LogError("Access token not found in response: {Content}", content);
-            return null;
+            if (_cache.TryGetValue("42_access_token", out string cachedToken))
+                return cachedToken;
+
+            _logger.LogInformation("Fetching new 42 access token...");
+
+            using var tokenRequest = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                new KeyValuePair<string, string>("client_id", _options.ClientId),
+                new KeyValuePair<string, string>("client_secret", _options.ClientSecret)
+            });
+
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.UserAgent.Clear();
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CvAssistantWeb", "1.0"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(TokenRequest)"));
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+
+            var response = await client.PostAsync(TokenUrl, tokenRequest);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Token request failed. StatusCode: {StatusCode}, ResponseBody: {Content}",
+                                 response.StatusCode, content);
+                return null;
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(content);
+                var root = doc.RootElement;
+
+                if (!root.TryGetProperty("access_token", out var tokenElement) || string.IsNullOrEmpty(tokenElement.GetString()))
+                {
+                    _logger.LogError("Access token not found in response: {Content}", content);
+                    return null;
+                }
+
+                var accessToken = tokenElement.GetString()!;
+                var expiresIn = root.TryGetProperty("expires_in", out var expiresElement) ? expiresElement.GetInt32() : 3600;
+
+                var cacheDuration = TimeSpan.FromSeconds(Math.Max(expiresIn - 30, 30));
+                _cache.Set("42_access_token", accessToken, cacheDuration);
+
+                _logger.LogInformation("Access token cached for {Seconds}s", cacheDuration.TotalSeconds);
+                return accessToken;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to parse token JSON: {Content}", content);
+                return null;
+            }
         }
 
-        var accessToken = tokenElement.GetString()!;
-        var expiresIn = root.TryGetProperty("expires_in", out var expiresElement) ? expiresElement.GetInt32() : 3600;
+        // =========================
+        // 5️⃣ Fallback profile helper
+        // =========================
+        private async Task<IActionResult> ReturnFallbackProfileAsync(string login, string reason)
+        {
+            try
+            {
+                var filePath = Path.Combine(AppContext.BaseDirectory, "Data", $"{login}.json");
 
-        var cacheDuration = TimeSpan.FromSeconds(Math.Max(expiresIn - 30, 30));
-        _cache.Set("42_access_token", accessToken, cacheDuration);
+                if (!System.IO.File.Exists(filePath))
+                {
+                    _logger.LogWarning("Fallback file not found for login {Login}. Path: {Path}", login, filePath);
+                    return NotFound(new { error = "ProfileNotFound", message = $"No fallback data for '{login}'." });
+                }
 
-        _logger.LogInformation("Access token cached for {Seconds}s", cacheDuration.TotalSeconds);
-        return accessToken;
-    }
-    catch (JsonException ex)
-    {
-        _logger.LogError(ex, "Failed to parse token JSON: {Content}", content);
-        return null;
-    }
-}
+                var json = await System.IO.File.ReadAllTextAsync(filePath);
+                _logger.LogInformation("Loaded fallback profile for {Login} (reason: {Reason})", login, reason);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load fallback profile for {Login}", login);
+                return StatusCode(500, new { error = "FallbackError", message = ex.Message });
+            }
+        }
+
+        // =========================
+        // 6️⃣ Test token endpoint
+        // =========================
         [HttpGet("TestToken")]
         public async Task<IActionResult> TestToken()
         {
@@ -194,6 +231,5 @@ namespace CvAssistantWeb.Controllers
                 return BadRequest("Token fetch failed; check logs.");
             return Ok(new { token = "<redacted>" });
         }
-
     }
 }
