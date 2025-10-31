@@ -115,36 +115,44 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5); }
 
         const login = "pedmonte";
 
-        // Try to fetch from cache first
-        const cachedProfile = localStorage.getItem("cached42Profile");
-        if (cachedProfile) {
-            try {
-                const data = JSON.parse(cachedProfile);
-                render42Profile(data, div);
-            } catch { /* ignore parse errors */ }
-        }
-
         try {
             const res = await fetch(`/School42/DiagnoseProfile/${login}`);
             if (!res.ok) throw new Error("Failed to fetch 42 API");
-            const dataWrapper = await res.json();
-            const data = dataWrapper.body ? JSON.parse(dataWrapper.body) : null;
 
-            if (data && data.login) {
-                // Cache profile in localStorage
-                localStorage.setItem("cached42Profile", JSON.stringify(data));
-                render42Profile(data, div);
-            } else if (!cachedProfile) {
+            const wrapper = await res.json();
+
+            // Parse the 'body' which is a JSON string
+            let data = null;
+            if (wrapper.body) {
+                try { data = JSON.parse(wrapper.body); }
+                catch (err) { console.error("Failed to parse 42 profile JSON", err); }
+            }
+
+            if (!data || !data.login) {
                 div.innerHTML = `<span class="text-warning">No profile data found for ${login}</span>`;
+                return;
             }
+
+            render42Profile(data, div);
+
+            // Cache it locally for fallback
+            localStorage.setItem("cached42Profile", JSON.stringify(data));
+
         } catch (err) {
-            if (!cachedProfile) {
-                div.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
-            } else {
-                console.warn("Using cached 42 profile due to fetch error:", err);
+            // Try fallback cache
+            const cachedProfile = localStorage.getItem("cached42Profile");
+            if (cachedProfile) {
+                try {
+                    const data = JSON.parse(cachedProfile);
+                    render42Profile(data, div);
+                    console.warn("Using cached profile due to fetch error:", err);
+                    return;
+                } catch { /* ignore parse errors */ }
             }
+            div.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
         }
     }
+
 
     function render42Profile(data, div) {
         let html = `<h5>${data.login} (${data.usual_full_name})</h5>`;
