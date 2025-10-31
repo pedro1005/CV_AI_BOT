@@ -232,7 +232,7 @@ function render42Profile(data, div) {
                 const description = p.project.name ?? 'No description';
 
                 // Add clickable project to fetch description dynamically
-                html += `<li style="cursor:pointer;" title="${description}" onclick="showProjectDescription('${p.project.name}')">
+                html += `<li style="cursor:pointer;" title="${description}" onclick="showProjectDescription('${description}')">
                             • ${p.project.name} - <span>${mark}</span>
                          </li>`;
             });
