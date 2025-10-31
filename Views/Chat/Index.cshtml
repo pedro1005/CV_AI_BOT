@@ -116,42 +116,69 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5); }
         const login = "pedmonte";
 
         try {
+            // 1️⃣ Try the DiagnoseProfile API
             const res = await fetch(`/School42/DiagnoseProfile/${login}`);
-            if (!res.ok) throw new Error("Failed to fetch 42 API");
+            if (!res.ok) throw new Error(`DiagnoseProfile failed: ${res.status}`);
 
             const wrapper = await res.json();
+            console.log("DiagnoseProfile response:", wrapper);
 
-            // Parse the 'body' which is a JSON string
+            // Handle flexible body format
             let data = null;
             if (wrapper.body) {
-                try { data = JSON.parse(wrapper.body); }
-                catch (err) { console.error("Failed to parse 42 profile JSON", err); }
+                data = typeof wrapper.body === "string" ? JSON.parse(wrapper.body) : wrapper.body;
+            } else {
+                data = wrapper;
             }
 
             if (!data || !data.login) {
-                div.innerHTML = `<span class="text-warning">No profile data found for ${login}</span>`;
-                return;
+                throw new Error("No profile data in DiagnoseProfile response");
             }
 
             render42Profile(data, div);
-
-            // Cache it locally for fallback
             localStorage.setItem("cached42Profile", JSON.stringify(data));
+            console.info(`✅ Loaded 42 profile from API for ${login}`);
+            return;
 
         } catch (err) {
-            // Try fallback cache
-            const cachedProfile = localStorage.getItem("cached42Profile");
-            if (cachedProfile) {
-                try {
-                    const data = JSON.parse(cachedProfile);
-                    render42Profile(data, div);
-                    console.warn("Using cached profile due to fetch error:", err);
+            console.warn("❌ DiagnoseProfile failed, trying /Data fallback:", err);
+
+            try {
+                // 2️⃣ Try loading from /Data/${login}.json
+                const fallbackRes = await fetch(`/Data/${login}.json`);
+                if (!fallbackRes.ok) throw new Error(`Local JSON not found: ${fallbackRes.status}`);
+
+                const data = await fallbackRes.json();
+
+                if (!data || !data.login) {
+                    div.innerHTML = `<span class="text-warning">No local profile data found for ${login}</span>`;
                     return;
-                } catch { /* ignore parse errors */ }
+                }
+
+                render42Profile(data, div);
+                console.info(`✅ Loaded 42 profile from /Data/${login}.json`);
+                localStorage.setItem("cached42Profile", JSON.stringify(data));
+                return;
+
+            } catch (fallbackErr) {
+                console.error("❌ Local JSON fallback failed:", fallbackErr);
+
+                // 3️⃣ Last resort: cached profile
+                const cachedProfile = localStorage.getItem("cached42Profile");
+                if (cachedProfile) {
+                    try {
+                        const data = JSON.parse(cachedProfile);
+                        render42Profile(data, div);
+                        console.warn("⚠️ Using cached 42 profile as last fallback.");
+                        return;
+                    } catch {}
+                }
+
+                div.innerHTML = `<span class="text-danger">Error loading 42 profile: ${fallbackErr.message}</span>`;
             }
-            div.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
         }
     }
+
 
 
     function render42Profile(data, div) {
