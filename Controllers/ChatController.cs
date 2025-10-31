@@ -70,6 +70,51 @@ namespace CvAssistantWeb.Controllers
                 return Json(new { reply = "Error: " + ex.Message });
             }
         }
+        
+        [HttpPost]
+        public async Task<IActionResult> DescribeProject(string projectName)
+        {
+            if (string.IsNullOrWhiteSpace(projectName))
+                return Json(new { success = false, description = "Project name missing." });
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient("CometAPI");
+
+                // Ask the AI to describe the project briefly
+                var prompt = $"Provide a short, 2-3 sentence description of the software project named '{projectName}'. " +
+                             "If you can't find info online, say 'No description found.'";
+
+                var payload = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = new object[]
+                    {
+                        new { role = "system", content = "You are an assistant that searches for concise software project descriptions online." },
+                        new { role = "user", content = prompt }
+                    }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("chat/completions", content);
+                response.EnsureSuccessStatusCode();
+
+                var resultJson = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(resultJson);
+                var description = doc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString() ?? "No description found.";
+
+                return Json(new { success = true, description });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, description = "Error: " + ex.Message });
+            }
+        }
+
 
         // ✅ Send message to DB (PostgreSQL)
         [HttpPost]
