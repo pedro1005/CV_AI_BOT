@@ -229,7 +229,7 @@ function render42Profile(data, div) {
             .sort((a, b) => new Date(b.marked_at) - new Date(a.marked_at))
             .forEach(p => {
                 const mark = p.final_mark ?? 'In progress';
-                const description = p.project.description ?? 'No description';
+                const description = p.project.name ?? 'No description';
 
                 // Add clickable project to fetch description dynamically
                 html += `<li style="cursor:pointer;" title="${description}" onclick="showProjectDescription('${p.project.name}')">

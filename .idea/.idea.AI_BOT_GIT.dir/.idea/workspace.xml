@@ -9,7 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="" />
+    <list default="true" id="5a4c2294-a8b6-444a-a12c-7bd2f7256d1f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Views/Chat/Index.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/Views/Chat/Index.cshtml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -126,7 +128,7 @@
       <workItem from="1761430967820" duration="3598000" />
       <workItem from="1761560823765" duration="2647000" />
       <workItem from="1761866734766" duration="3780000" />
-      <workItem from="1761903146081" duration="3642000" />
+      <workItem from="1761903146081" duration="4095000" />
     </task>
     <servers />
   </component>
