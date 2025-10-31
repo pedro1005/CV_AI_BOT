@@ -63,8 +63,8 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5); }
     <!-- ===== 42 PROFILE ===== -->
     <div class="glass-card p-4 mb-5 text-center">
         <h3 class="text-primary mb-3"><i class="bi bi-mortarboard"></i> 42 School Journey</h3>
-        <button class="btn btn-primary btn-tech" onclick="fetch42Profile()">Show My 42 Path</button>
-        <div id="school42Profile" class="mt-3 text-start"></div>
+        <button id="toggle42Btn" class="btn btn-primary btn-tech" onclick="toggle42Profile()">Show My 42 Path</button>
+        <div id="school42Profile" class="mt-3 text-start" style="display:none;"></div>
     </div>
 
     <!-- ===== ASK ABOUT CV ===== -->
@@ -109,143 +109,130 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.5); }
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    async function fetch42Profile() {
-        const div = document.getElementById("school42Profile");
-        div.innerHTML = `<div class="spinner-border text-primary"></div> Loading...`;
+let is42Visible = false; // track profile visibility
 
-        const login = "pedmonte";
+async function toggle42Profile() {
+    const div = document.getElementById("school42Profile");
+    const btn = document.getElementById("toggle42Btn");
 
+    if (is42Visible) {
+        div.style.display = "none";
+        btn.innerText = "Show My 42 Path";
+        is42Visible = false;
+    } else {
+        div.style.display = "block";
+        btn.innerText = "Hide Profile";
+        is42Visible = true;
+
+        // fetch profile only if empty
+        if (!div.innerHTML.trim()) {
+            await fetch42Profile();
+        }
+    }
+}
+
+async function fetch42Profile() {
+    const div = document.getElementById("school42Profile");
+    div.innerHTML = `<div class="spinner-border text-primary"></div> Loading...`;
+
+    const login = "pedmonte";
+
+    try {
+        const res = await fetch(`/School42/DiagnoseProfile/${login}`);
+        if (!res.ok) throw new Error(`DiagnoseProfile failed: ${res.status}`);
+
+        const wrapper = await res.json();
+        let data = wrapper.body ? (typeof wrapper.body === "string" ? JSON.parse(wrapper.body) : wrapper.body) : wrapper;
+
+        if (!data || !data.login) throw new Error("No profile data in DiagnoseProfile response");
+
+        render42Profile(data, div);
+        localStorage.setItem("cached42Profile", JSON.stringify(data));
+        console.info(`✅ Loaded 42 profile from API for ${login}`);
+
+    } catch (err) {
+        console.warn("❌ DiagnoseProfile failed, trying /Data fallback:", err);
         try {
-            // 1️⃣ Try the DiagnoseProfile API
-            const res = await fetch(`/School42/DiagnoseProfile/${login}`);
-            if (!res.ok) throw new Error(`DiagnoseProfile failed: ${res.status}`);
-
-            const wrapper = await res.json();
-            console.log("DiagnoseProfile response:", wrapper);
-
-            // Handle flexible body format
-            let data = null;
-            if (wrapper.body) {
-                data = typeof wrapper.body === "string" ? JSON.parse(wrapper.body) : wrapper.body;
-            } else {
-                data = wrapper;
-            }
+            const fallbackRes = await fetch(`/Data/${login}.json`);
+            if (!fallbackRes.ok) throw new Error(`Local JSON not found: ${fallbackRes.status}`);
+            const data = await fallbackRes.json();
 
             if (!data || !data.login) {
-                throw new Error("No profile data in DiagnoseProfile response");
+                div.innerHTML = `<span class="text-warning">No local profile data found for ${login}</span>`;
+                return;
             }
 
             render42Profile(data, div);
             localStorage.setItem("cached42Profile", JSON.stringify(data));
-            console.info(`✅ Loaded 42 profile from API for ${login}`);
-            return;
+            console.info(`✅ Loaded 42 profile from /Data/${login}.json`);
 
-        } catch (err) {
-            console.warn("❌ DiagnoseProfile failed, trying /Data fallback:", err);
-
-            try {
-                // 2️⃣ Try loading from /Data/${login}.json
-                const fallbackRes = await fetch(`/Data/${login}.json`);
-                if (!fallbackRes.ok) throw new Error(`Local JSON not found: ${fallbackRes.status}`);
-
-                const data = await fallbackRes.json();
-
-                if (!data || !data.login) {
-                    div.innerHTML = `<span class="text-warning">No local profile data found for ${login}</span>`;
+        } catch (fallbackErr) {
+            console.error("❌ Local JSON fallback failed:", fallbackErr);
+            const cachedProfile = localStorage.getItem("cached42Profile");
+            if (cachedProfile) {
+                try {
+                    const data = JSON.parse(cachedProfile);
+                    render42Profile(data, div);
+                    console.warn("⚠️ Using cached 42 profile as last fallback.");
                     return;
-                }
-
-                render42Profile(data, div);
-                console.info(`✅ Loaded 42 profile from /Data/${login}.json`);
-                localStorage.setItem("cached42Profile", JSON.stringify(data));
-                return;
-
-            } catch (fallbackErr) {
-                console.error("❌ Local JSON fallback failed:", fallbackErr);
-
-                // 3️⃣ Last resort: cached profile
-                const cachedProfile = localStorage.getItem("cached42Profile");
-                if (cachedProfile) {
-                    try {
-                        const data = JSON.parse(cachedProfile);
-                        render42Profile(data, div);
-                        console.warn("⚠️ Using cached 42 profile as last fallback.");
-                        return;
-                    } catch {}
-                }
-
-                div.innerHTML = `<span class="text-danger">Error loading 42 profile: ${fallbackErr.message}</span>`;
+                } catch {}
             }
+            div.innerHTML = `<span class="text-danger">Error loading 42 profile: ${fallbackErr.message}</span>`;
         }
     }
+}
 
+function render42Profile(data, div) {
+    let html = `<h5>${data.login} (${data.usual_full_name})</h5>`;
 
-
-    function render42Profile(data, div) {
-        let html = `<h5>${data.login} (${data.usual_full_name})</h5>`;
-
-        // ===== CURSUS =====
-        if (data.cursus_users?.length) {
-            html += `<h6 class="mt-3 text-info">Cursus Progress</h6>`;
-            html += `<div class="accordion" id="cursusAccordion">`;
-
-            data.cursus_users
-                .filter(c => !c.cursus.name.toLowerCase().includes("piscine")) // skip piscine
-                .forEach((cursus, idx) => {
-                    html += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="cursusHeading${idx}">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cursusCollapse${idx}" aria-expanded="false" aria-controls="cursusCollapse${idx}">
-                            ${cursus.cursus.name} - Level: ${cursus.level.toFixed(2)}
-                        </button>
-                    </h2>
-                    <div id="cursusCollapse${idx}" class="accordion-collapse collapse" aria-labelledby="cursusHeading${idx}" data-bs-parent="#cursusAccordion">
-                        <div class="accordion-body">
-                            ${cursus.skills?.length ? cursus.skills.map(s => `
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between">
-                                        <span>${s.name}</span>
-                                        <span>${s.level.toFixed(2)}</span>
-                                    </div>
-                                    <div class="progress" style="height:6px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width:${Math.min(s.level / 21 * 100, 100)}%" aria-valuenow="${s.level.toFixed(2)}" aria-valuemin="0" aria-valuemax="21"></div>
-                                    </div>
-                                </div>`).join('') : '<p>No skills data</p>'}
-                        </div>
+    if (data.cursus_users?.length) {
+        html += `<h6 class="mt-3 text-info">Cursus Progress</h6><div class="accordion" id="cursusAccordion">`;
+        data.cursus_users.filter(c => !c.cursus.name.toLowerCase().includes("piscine")).forEach((cursus, idx) => {
+            html += `
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="cursusHeading${idx}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cursusCollapse${idx}" aria-expanded="false" aria-controls="cursusCollapse${idx}">
+                        ${cursus.cursus.name} - Level: ${cursus.level.toFixed(2)}
+                    </button>
+                </h2>
+                <div id="cursusCollapse${idx}" class="accordion-collapse collapse" aria-labelledby="cursusHeading${idx}" data-bs-parent="#cursusAccordion">
+                    <div class="accordion-body">
+                        ${cursus.skills?.length ? cursus.skills.map(s => `
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>${s.name}</span>
+                                <span>${s.level.toFixed(2)}</span>
+                            </div>
+                            <div class="progress" style="height:6px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width:${Math.min(s.level / 21 * 100, 100)}%" aria-valuenow="${s.level.toFixed(2)}" aria-valuemin="0" aria-valuemax="21"></div>
+                            </div>
+                        </div>`).join('') : '<p>No skills data</p>'}
                     </div>
-                </div>`;
-                });
-
-            html += `</div>`;
-        }
-
-        // ===== PROJECTS =====
-        if (data.projects_users?.length) {
-            html += `<h6 class="mt-3 text-success">Projects</h6>`;
-            html += `<ul class="list-unstyled">`;
-            data.projects_users
-                .sort((a, b) => new Date(b.marked_at) - new Date(a.marked_at))
-                .forEach(p => {
-                    const mark = p.final_mark ?? 'In progress';
-                    const description = p.project.description ? p.project.description.replace(/"/g, '&quot;') : 'No description';
-                    html += `<li title="${description}">• ${p.project.name} - <span>${mark}</span></li>`;
-                });
-            html += `</ul>`;
-        }
-
-        div.innerHTML = html;
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
     }
 
-    //document.addEventListener("DOMContentLoaded", fetch42Profile);
+    if (data.projects_users?.length) {
+        html += `<h6 class="mt-3 text-success">Projects</h6><ul class="list-unstyled">`;
+        data.projects_users.sort((a, b) => new Date(b.marked_at) - new Date(a.marked_at)).forEach(p => {
+            const mark = p.final_mark ?? 'In progress';
+            const description = p.project.description ? p.project.description.replace(/"/g, '&quot;') : 'No description';
+            html += `<li title="${description}">• ${p.project.name} - <span>${mark}</span></li>`;
+        });
+        html += `</ul>`;
+    }
+
+    div.innerHTML = html;
+}
 
 // --- Ask about CV ---
 async function askAboutCv() {
     const replyDiv = document.getElementById("cvReply");
     const question = document.getElementById("cvQuestion").value.trim();
     if (!question) { replyDiv.innerText = "Please type your question."; return; }
-
     replyDiv.innerHTML = `<div class="spinner-border text-info" role="status"></div> Thinking...`;
-
     try {
         const res = await fetch("/Chat/Ask", {
             method: "POST",
@@ -266,14 +253,8 @@ async function sendUserMessage() {
     const contact = document.getElementById("contactName").value.trim();
     const message = document.getElementById("contactMessage").value.trim();
     const replyDiv = document.getElementById("messageReply");
-
-    if (!company || !contact || !message) {
-        replyDiv.innerText = "Please fill in all fields.";
-        return;
-    }
-
+    if (!company || !contact || !message) { replyDiv.innerText = "Please fill in all fields."; return; }
     replyDiv.innerHTML = `<div class="spinner-border text-success"></div> Sending...`;
-
     const userMessage = `Send a message to Company: ${company}, Contact: ${contact}, Message: ${message}`;
     try {
         const res = await fetch("/Chat/SendMessage", {
@@ -296,9 +277,7 @@ async function fetchAllMessages() {
     const replyDiv = document.getElementById("allMessages");
     const password = document.getElementById("adminPassword").value.trim();
     if (!password) { replyDiv.innerText = "Please enter the password."; return; }
-
     replyDiv.innerHTML = `<div class="spinner-border text-warning"></div> Loading...`;
-
     try {
         const formData = new URLSearchParams();
         formData.append("password", password);
@@ -308,17 +287,14 @@ async function fetchAllMessages() {
             body: formData.toString()
         });
         const data = await res.json();
-
         if (!data.success) {
             replyDiv.innerHTML = `<span class="text-danger">${data.reply}</span>`;
             return;
         }
-
         if (!data.messages.length) {
             replyDiv.innerHTML = `<p>No messages yet.</p>`;
             return;
         }
-
         replyDiv.innerHTML = data.messages.map(m => `
             <div class="p-3 mb-2 rounded border border-light bg-dark bg-opacity-25">
                 <h6 class="text-info mb-1">${m.company} / <span class="text-light">${m.contact}</span></h6>
@@ -326,11 +302,8 @@ async function fetchAllMessages() {
                 <small class="text-secondary">${m.date}</small>
             </div>
         `).join("");
-
     } catch (err) {
         replyDiv.innerHTML = `<span class="text-danger">Error: ${err}</span>`;
     }
 }
 </script>
-
-
