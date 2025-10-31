@@ -82,7 +82,7 @@ namespace CvAssistantWeb.Controllers
                 var client = _httpClientFactory.CreateClient("CometAPI");
 
                 // Ask the AI to describe the project briefly
-                var prompt = $"Provide a short, 2-3 sentence description of the software project named '{projectName}'. " +
+                var prompt = $"Provide a short, 2-3 sentence description of the software project named '{projectName}' from 42school common core. " +
                              "If you can't find info online, say 'No description found.'";
 
                 var payload = new
